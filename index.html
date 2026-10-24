@@ -77,10 +77,12 @@
                             <path d="M 83 23 L 83 40 C 83 46 99 46 99 40 L 99 23 L 95 23 L 95 36 L 93 36 L 93 23 L 89 23 L 89 36 L 87 36 L 87 23 Z M 89 44 L 93 44 L 93 68 L 89 68 Z" />
                             <!-- Knife -->
                             <path d="M 103 23 C 111 23 112 38 111 46 L 103 46 Z M 105 48 L 109 48 L 109 68 L 105 68 Z" />
+                            <!-- Seasoning Dots -->
                             <circle cx="73" cy="69" r="3" />
                             <circle cx="82" cy="74" r="2.5" />
                             <circle cx="94" cy="71" r="2" />
                             <circle cx="98" cy="76" r="2.5" />
+                            <!-- 'yumara' Text -->
                             <text x="120" y="65" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="46" letter-spacing="-1">yumara</text>
                         </svg>
                     </div>
@@ -544,6 +546,18 @@
         </div>
     </div>
 
+    <!-- Global Firebase Credentials -->
+    <script>
+      window.__firebase_config = JSON.stringify({
+        apiKey: "AIzaSy...",
+        authDomain: "your-app.firebaseapp.com",
+        projectId: "your-app",
+        storageBucket: "your-app.firebasestorage.app",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:..."
+      });
+    </script>
+
     <!-- Firebase Real-Time Synchronization Module -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -757,7 +771,6 @@
                 if (!this.db || !window.fbCore) return;
 
                 const { doc, onSnapshot } = window.fbCore;
-                // Rule 1 strictly followed
                 const sessionDoc = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'food_sessions', code);
 
                 if (this.fbUnsubscribe) {
@@ -782,7 +795,6 @@
                 try {
                     const { doc, setDoc } = window.fbCore;
                     const sessionDoc = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'food_sessions', this.sessionCode);
-                    // Sanitize undefined fields for Firestore
                     const cleanData = JSON.parse(JSON.stringify(this.sessionData));
                     await setDoc(sessionDoc, cleanData, { merge: true });
                 } catch (err) {
@@ -895,68 +907,6 @@
             showLandingView() {
                 document.getElementById('view-landing').classList.remove('hidden');
                 document.getElementById('view-session').classList.add('hidden');
-            }
-
-            // -------------------------------------------------------------
-            // SESSION CREATION
-            // -------------------------------------------------------------
-            async handleCreateSession(event) {
-                if (event) event.preventDefault();
-                
-                const submitBtn = document.getElementById('btn-submit-create');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerText = 'Creating Session...';
-                }
-
-                try {
-                    const restName = document.getElementById('create-restaurant-name').value.trim();
-                    const adminName = document.getElementById('create-admin-name').value.trim();
-                    const menuUrl = document.getElementById('create-menu-url').value.trim();
-                    const deliveryFee = parseFloat(document.getElementById('create-delivery-fee').value) || 0;
-                    const serviceFee = parseFloat(document.getElementById('create-service-fee').value) || 0;
-                    const fileInput = document.getElementById('create-menu-file');
-
-                    let menuImageData = null;
-                    if (fileInput && fileInput.files && fileInput.files[0]) {
-                        menuImageData = await this.readFileAsBase64(fileInput.files[0]);
-                    }
-
-                    this.sessionCode = this.generateShortCode();
-
-                    this.sessionData = {
-                        sessionCode: this.sessionCode,
-                        restaurantName: restName,
-                        adminName: adminName,
-                        menuUrl: menuUrl,
-                        menuImage: menuImageData,
-                        deliveryFee: deliveryFee,
-                        serviceFee: serviceFee,
-                        taxType: 'fixed',
-                        splitMethod: 'equal',
-                        isLocked: false,
-                        createdAt: new Date().toISOString(),
-                        presets: [],
-                        participants: []
-                    };
-
-                    this.saveSessionToLocalStorage();
-                    await this.syncToCloud();
-
-                    this.closeModal('modal-create-session');
-                    window.location.hash = `#session=${this.sessionCode}`;
-                    this.showToast(`Session ${this.sessionCode} created! Share the link with your team.`, 'success');
-
-                } catch (err) {
-                    console.error('Session creation error:', err);
-                    this.showToast('Failed to create session.', 'error');
-                } finally {
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i><span>Create Live Session</span>`;
-                        lucide.createIcons();
-                    }
-                }
             }
 
             // -------------------------------------------------------------
