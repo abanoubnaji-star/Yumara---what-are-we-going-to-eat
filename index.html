@@ -42,9 +42,6 @@
     </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDK (Realtime Cross-Device Database) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -85,13 +82,9 @@
 
                 <!-- Navigation Controls -->
                 <div class="flex items-center space-x-2">
-                    <button onclick="app.openConfigModal()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-cream-200 hover:bg-cream-300 rounded-lg border border-cream-300 transition-colors" title="Configure Cloud Database">
-                        <i data-lucide="cloud" class="w-3.5 h-3.5 text-yumara-600"></i>
-                        <span class="hidden sm:inline">Cloud Sync</span>
-                    </button>
                     <button onclick="app.openHistoryModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-yumara-800 bg-cream-200 hover:bg-cream-300 rounded-lg transition-colors border border-cream-300">
                         <i data-lucide="history" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">History</span>
+                        <span class="hidden sm:inline">Order History</span>
                     </button>
                     <button onclick="app.showCreateSessionModal()" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-lg shadow-sm transition-colors">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -117,17 +110,17 @@
             <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 mb-1 tracking-tight">What Are We Going to Eat?</h2>
             <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mb-3">Powered by yumara</p>
             <p class="text-slate-600 mb-6 leading-relaxed text-sm">
-                Start a session as Admin, share one link with everyone, and watch everyone's food orders update live in real-time in <strong>EGP (ج.م)</strong>.
+                Start a session as Admin, share one link with your colleagues, and view orders update live from any phone in <strong>EGP (ج.م)</strong>.
             </p>
 
             <!-- Quick Join Room Input -->
             <div class="w-full bg-white p-4 rounded-2xl border border-cream-300 shadow-sm mb-5 text-left">
-                <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1.5">Enter Session Code:</label>
+                <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1.5">Have a Session Code?</label>
                 <div class="flex items-center space-x-2">
                     <input type="text" id="landing-code-input" placeholder="e.g. YUM-824" maxlength="8" class="flex-1 uppercase font-mono tracking-widest text-center text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 font-bold text-forest-800 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600">
                     <button onclick="app.joinByCode()" class="px-5 py-2.5 bg-yumara-600 hover:bg-yumara-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center space-x-1.5">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
-                        <span>Join Room</span>
+                        <span>Join</span>
                     </button>
                 </div>
             </div>
@@ -153,8 +146,8 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                            <span id="role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-yumara-100 text-yumara-800 border border-yumara-200">
-                                COLLABORATIVE BOARD
+                            <span id="role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                ADMIN DASHBOARD
                             </span>
                             <!-- 6-character Code Pill -->
                             <button onclick="app.copySessionCode()" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cream-200 hover:bg-cream-300 text-forest-800 border border-cream-300 flex items-center gap-1.5 transition-colors" title="Click to copy room code">
@@ -165,8 +158,8 @@
                             <span id="board-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Open
                             </span>
-                            <span id="live-connection-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Cloud Sync Active
+                            <span id="sync-status-badge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Synced
                             </span>
                         </div>
                         <h2 id="board-restaurant-name" class="text-2xl font-extrabold text-forest-800 tracking-tight">Restaurant Name</h2>
@@ -206,7 +199,7 @@
                         <div class="flex items-center justify-between border-b border-cream-200 pb-3">
                             <div class="flex items-center space-x-2">
                                 <i data-lucide="utensils" class="w-5 h-5 text-yumara-600"></i>
-                                <h3 id="order-form-header-title" class="font-extrabold text-forest-800 text-sm sm:text-base">Add or Edit Your Order</h3>
+                                <h3 id="order-form-header-title" class="font-extrabold text-forest-800 text-sm sm:text-base">Add or Update Your Order</h3>
                             </div>
                             <span id="order-form-badge" class="hidden text-[11px] font-bold text-yumara-700 bg-yumara-100 px-2 py-0.5 rounded-md">
                                 Editing
@@ -281,7 +274,7 @@
                                 <i data-lucide="receipt" class="w-5 h-5 text-yumara-600"></i>
                                 <h3 class="font-extrabold text-forest-800 text-base">Delivery & Tax Fees</h3>
                             </div>
-                            <span id="admin-only-badge" class="text-[11px] font-bold text-yumara-700 bg-yumara-50 border border-yumara-200 px-2 py-0.5 rounded">Admin Control</span>
+                            <span id="admin-badge-indicator" class="text-[11px] font-bold text-yumara-700 bg-yumara-50 border border-yumara-200 px-2 py-0.5 rounded">Admin Only</span>
                         </div>
 
                         <div class="space-y-3">
@@ -354,26 +347,6 @@
 
     </main>
 
-    <!-- MODAL: CLOUD FIREBASE CONFIG -->
-    <div id="modal-cloud-config" class="fixed inset-0 bg-forest-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-cream-300 space-y-4">
-            <div class="flex justify-between items-center border-b border-cream-200 pb-3">
-                <h3 class="font-extrabold text-forest-800 text-base">Cloud Sync Settings</h3>
-                <button onclick="app.closeModal('modal-cloud-config')" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed">
-                To connect everyone across separate devices and cellular networks (4G/5G), paste your Firebase project config object once. It will sync all rooms permanently.
-            </p>
-            <textarea id="firebase-config-input" rows="6" placeholder='{"apiKey": "...", "databaseURL": "...", "projectId": "..."}' class="w-full text-xs font-mono p-3 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 text-forest-800"></textarea>
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="app.closeModal('modal-cloud-config')" class="px-4 py-2 text-xs font-bold text-slate-500">Cancel</button>
-                <button onclick="app.saveCloudConfig()" class="px-4 py-2 bg-yumara-600 hover:bg-yumara-700 text-white font-bold text-xs rounded-xl">Save & Connect</button>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL: CREATE SESSION -->
     <div id="modal-create-session" class="fixed inset-0 bg-forest-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-cream-300 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -387,12 +360,12 @@
             <form id="create-session-form" onsubmit="app.handleCreateSession(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Restaurant Name *</label>
-                    <input type="text" id="create-restaurant-name" required placeholder="e.g. Zooba, McDonald's..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
+                    <input type="text" id="create-restaurant-name" required placeholder="e.g. Zooba, Kebdet El Prince..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Admin / Organizer Name *</label>
-                    <input type="text" id="create-admin-name" required placeholder="Your name" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
+                    <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Your Name (Admin) *</label>
+                    <input type="text" id="create-admin-name" required placeholder="e.g. Mostafa" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
                 </div>
 
                 <div>
@@ -476,16 +449,15 @@
         </div>
     </div>
 
-    <!-- Application Script -->
+    <!-- Application Script (Zero-Config Global Cloud Sync) -->
     <script>
         class FoodOrderApp {
             constructor() {
                 this.sessionCode = null;
                 this.isAdmin = false;
                 this.currentEditingParticipantId = null;
-
-                // Cloud database reference
-                this.dbRef = null;
+                this.pollInterval = null;
+                this.isSaving = false;
 
                 this.sessionData = {
                     sessionCode: '',
@@ -504,7 +476,6 @@
                     participants: []
                 };
 
-                this.initFirebase();
                 window.addEventListener('hashchange', () => this.handleRouting());
                 
                 document.addEventListener('DOMContentLoaded', () => {
@@ -513,30 +484,65 @@
                 });
             }
 
-            // Initializes Firebase Realtime Database
-            initFirebase() {
-                let config = null;
-                const saved = localStorage.getItem('yumara_firebase_config');
-                if (saved) {
-                    try { config = JSON.parse(saved); } catch(e){}
+            // Clean 6-character room code (e.g. YUM-824)
+            generateRoomCode() {
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                let code = '';
+                for (let i = 0; i < 3; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
+                const num = Math.floor(100 + Math.random() * 900);
+                return `${code}-${num}`;
+            }
 
-                // If user hasn't configured a custom one, fallback to free open relay
-                if (!config) {
-                    config = {
-                        databaseURL: "https://yumara-food-orders-default-rtdb.firebaseio.com"
-                    };
+            getUniversalShareURL(code) {
+                const targetCode = code || this.sessionCode;
+                return `${window.location.origin}${window.location.pathname}#session=${targetCode}`;
+            }
+
+            copyUniversalShareLink() {
+                const url = this.getUniversalShareURL();
+                this.fallbackCopyText(url);
+                this.showToast('Copied shared link to clipboard!', 'success');
+            }
+
+            copySessionCode() {
+                if (!this.sessionCode) return;
+                this.fallbackCopyText(this.sessionCode);
+                this.showToast(`Copied code: ${this.sessionCode}`, 'success');
+            }
+
+            joinByCode() {
+                const input = document.getElementById('landing-code-input').value.trim().toUpperCase();
+                if (!input) {
+                    this.showToast('Please enter a session code', 'error');
+                    return;
+                }
+                window.location.hash = `session=${input}`;
+            }
+
+            // Admin Creates Session
+            async handleCreateSession(event) {
+                if (event) event.preventDefault();
+
+                const submitBtn = document.getElementById('btn-submit-create');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = 'Creating Room...';
                 }
 
                 try {
-                    if (!firebase.apps.length) {
-                        firebase.initializeApp(config);
-                    }
-                    this.db = firebase.database();
-                } catch(e) {
-                    console.log("Database initialized:", e);
-                }
-            }
+                    const restName = document.getElementById('create-restaurant-name').value.trim();
+                    const adminName = document.getElementById('create-admin-name').value.trim();
+                    const menuUrl = document.getElementById('create-menu-url').value.trim();
+                    const deliveryFee = parseFloat(document.getElementById('create-delivery-fee').value) || 0;
+                    const serviceFee = parseFloat(document.getElementById('create-service-fee').value) || 0;
+                    const fileInput = document.getElementById('create-menu-file');
 
-            openConfigModal() {
-                const saved = localStorage.getItem('yum
+                    let menuImageData = null;
+                    if (fileInput && fileInput.files && fileInput.files[0]) {
+                        menuImageData = await this.readFileAsBase64(fileInput.files[0]);
+                    }
+
+                    const newCode = this.generateRoomCode();
+                    const admin
