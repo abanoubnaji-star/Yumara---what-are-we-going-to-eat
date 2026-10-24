@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What Are We Going to Eat? — Yumara Live</title>
+    <title>What Are We Going to Eat? — yumara</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -68,7 +68,7 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6">
             <div class="flex justify-between items-center h-16">
                 <!-- Yumara Logo & Title -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="app.goHome()">
+                <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="app.goHome()">
                     <div class="flex items-center gap-2 text-yumara-600">
                         <svg class="h-8 w-auto fill-current" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
                             <!-- Cloche Dome -->
@@ -90,17 +90,15 @@
 
                 <!-- Navigation Controls -->
                 <div class="flex items-center space-x-2">
-                    <!-- Cloud Status Indicator -->
-                    <button onclick="app.openCloudSetupModal()" id="cloud-status-btn" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors bg-cream-100 text-forest-800 border-cream-300 hover:bg-cream-200">
-                        <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        <span id="cloud-status-label" class="hidden sm:inline">Local Sync</span>
-                    </button>
+                    <div id="sync-status-indicator" class="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-cream-200 text-forest-800 border border-cream-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span id="sync-status-text">Cloud Sync Live</span>
+                    </div>
 
                     <button onclick="app.openHistoryModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-yumara-800 bg-cream-200 hover:bg-cream-300 rounded-lg transition-colors border border-cream-300">
                         <i data-lucide="history" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">Order History</span>
                     </button>
-                    
                     <button onclick="app.showCreateSessionModal()" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-lg shadow-sm transition-colors">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">New Group Order</span>
@@ -125,9 +123,9 @@
             
             <div>
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 tracking-tight">What Are We Going to Eat?</h2>
-                <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mt-1">Unified Real-Time Group Ordering • Powered by Yumara</p>
+                <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mt-1">Live Multi-User Food Ordering • Powered by yumara</p>
                 <p class="text-slate-600 mt-3 text-sm leading-relaxed max-w-md mx-auto">
-                    One live link for the entire office. Enter orders from any phone or PC, edit any colleague's item in real-time, and split delivery & taxes in <strong>EGP (ج.م)</strong>.
+                    Real-time cloud sync across everyone’s phones & laptops. Add orders, split delivery & taxes in <strong>EGP (ج.م)</strong>, and track payments seamlessly.
                 </p>
             </div>
 
@@ -146,7 +144,7 @@
                 </div>
             </div>
 
-            <!-- Start New Order / Historical -->
+            <!-- Or Start New Order -->
             <div class="flex flex-col sm:flex-row gap-3 w-full">
                 <button onclick="app.showCreateSessionModal()" class="flex-1 inline-flex justify-center items-center space-x-2 px-6 py-3.5 text-sm font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-xl shadow-lg shadow-yumara-600/20 transition-all transform hover:-translate-y-0.5">
                     <i data-lucide="plus-circle" class="w-5 h-5"></i>
@@ -159,7 +157,7 @@
             </div>
         </div>
 
-        <!-- VIEW 2: UNIFIED LIVE COLLABORATIVE BOARD -->
+        <!-- VIEW 2: UNIFIED COLLABORATIVE BOARD -->
         <div id="view-session" class="hidden space-y-6">
 
             <!-- Universal Session Banner -->
@@ -208,13 +206,13 @@
                 </div>
             </div>
 
-            <!-- Grid Layout -->
+            <!-- Grid: Left = Add/Edit Form & Order Board, Right = Bill & Admin Controls -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                <!-- Left Column: Add/Edit Order Form & Orders List -->
+                <!-- Main Col (col-span-7) -->
                 <div class="lg:col-span-7 space-y-6">
 
-                    <!-- REAL-TIME ADD / EDIT ORDER FORM -->
+                    <!-- QUICK ORDER INPUT FORM -->
                     <div class="bg-white rounded-2xl p-5 border border-cream-300 shadow-sm space-y-4">
                         <div class="flex items-center justify-between border-b border-cream-200 pb-3">
                             <div class="flex items-center space-x-2">
@@ -226,7 +224,7 @@
                             </span>
                         </div>
 
-                        <!-- Name & Payment -->
+                        <!-- 1. Name & Payment Method -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Your Name *</label>
@@ -254,7 +252,7 @@
                             <div id="board-presets-list" class="flex flex-wrap gap-1.5"></div>
                         </div>
 
-                        <!-- Items List -->
+                        <!-- 2. Items List -->
                         <div class="space-y-2 pt-2 border-t border-cream-200">
                             <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider">Food Items & Prices (EGP)</label>
                             <div id="board-items-inputs" class="space-y-2"></div>
@@ -265,12 +263,12 @@
                             </button>
                         </div>
 
-                        <!-- Notes -->
+                        <!-- 3. Notes -->
                         <div>
-                            <input type="text" id="order-input-note" placeholder="Special note (e.g. no onions, extra sauce)..." class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-medium text-forest-800">
+                            <input type="text" id="order-input-note" placeholder="Special note (e.g. no onions, extra spicy)..." class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-medium text-forest-800 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600">
                         </div>
 
-                        <!-- Submit Order Buttons -->
+                        <!-- Submit Order Button -->
                         <div class="flex gap-2 pt-1">
                             <button id="btn-submit-order" onclick="app.submitColleagueOrder()" class="flex-1 py-2.5 bg-yumara-600 hover:bg-yumara-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-yumara-600/20 transition-all flex items-center justify-center space-x-2">
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -282,7 +280,7 @@
                         </div>
                     </div>
 
-                    <!-- ALL COLLEAGUES' ORDERS STREAM -->
+                    <!-- UNIVERSAL SHARED ORDERS BOARD -->
                     <div class="bg-white rounded-2xl p-5 border border-cream-300 shadow-sm space-y-4">
                         <div class="flex items-center justify-between border-b border-cream-200 pb-3">
                             <div class="flex items-center space-x-2">
@@ -294,12 +292,13 @@
                             </span>
                         </div>
 
+                        <!-- Orders Stream -->
                         <div id="board-orders-list" class="space-y-4 divide-y divide-cream-200"></div>
                     </div>
 
                 </div>
 
-                <!-- Right Column: Bill Totals & Admin Settings -->
+                <!-- Right Col: Calculations & Admin Panel (col-span-5) -->
                 <div class="lg:col-span-5 space-y-6">
 
                     <!-- Grand Total Summary Card -->
@@ -349,7 +348,7 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-xs font-bold text-forest-800 mb-1">Delivery Fee (EGP)</label>
-                                <input type="number" id="admin-input-delivery" min="0" step="0.5" placeholder="0.00" onchange="app.updateAdminFees()" oninput="app.updateAdminFees()" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-semibold text-forest-800">
+                                <input type="number" id="admin-input-delivery" min="0" step="0.5" placeholder="0.00" oninput="app.updateAdminFees()" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-semibold text-forest-800 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600">
                             </div>
 
                             <div>
@@ -358,12 +357,12 @@
                                     <button type="button" id="tax-type-fixed" onclick="app.setTaxType('fixed')" class="py-1.5 text-xs font-bold rounded-lg border border-yumara-600 bg-yumara-50 text-yumara-700">Fixed (EGP)</button>
                                     <button type="button" id="tax-type-percent" onclick="app.setTaxType('percent')" class="py-1.5 text-xs font-bold rounded-lg border border-cream-300 bg-cream-100 text-forest-800">Percentage (%)</button>
                                 </div>
-                                <input type="number" id="admin-input-tax" min="0" step="0.1" placeholder="0" onchange="app.updateAdminFees()" oninput="app.updateAdminFees()" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-semibold text-forest-800">
+                                <input type="number" id="admin-input-tax" min="0" step="0.1" placeholder="0" oninput="app.updateAdminFees()" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-semibold text-forest-800 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-forest-800 mb-1">Fee Splitting Mode</label>
-                                <select id="admin-select-split" onchange="app.updateAdminFees()" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-semibold text-forest-800">
+                                <select id="admin-select-split" onchange="app.updateAdminFees()" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-cream-50 font-semibold text-forest-800 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600">
                                     <option value="equal">Equal Split (Divided per person)</option>
                                     <option value="proportional">Proportional (Based on food subtotal)</option>
                                 </select>
@@ -385,60 +384,6 @@
         </div>
 
     </main>
-
-    <!-- MODAL: GITHUB PAGES FREE CLOUD CONFIG -->
-    <div id="modal-cloud-setup" class="fixed inset-0 bg-forest-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-cream-300 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex justify-between items-center border-b border-cream-200 pb-3">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="cloud" class="w-5 h-5 text-yumara-600"></i>
-                    <h3 class="font-extrabold text-forest-800 text-lg">Multi-Device Live Cloud Sync</h3>
-                </div>
-                <button onclick="app.closeModal('modal-cloud-setup')" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <p class="text-xs text-slate-600 leading-relaxed">
-                To sync between separate colleagues across different Wi-Fi networks and mobile phones on GitHub Pages in real-time, paste your free Firebase project config below.
-            </p>
-
-            <div class="bg-cream-50 p-3 rounded-xl border border-cream-300 text-[11px] text-forest-800 space-y-1">
-                <p class="font-bold">How to get this free in 1 minute:</p>
-                <ol class="list-decimal pl-4 space-y-0.5 text-slate-600">
-                    <li>Visit <a href="https://console.firebase.google.com" target="_blank" class="text-yumara-700 underline font-semibold">console.firebase.google.com</a> & click <strong>Create a project</strong>.</li>
-                    <li>Under Project Settings, add a <strong>Web App</strong> & copy the <code>firebaseConfig = { ... }</code>.</li>
-                    <li>In the left sidebar, click <strong>Cloud Firestore</strong> &rarr; <strong>Create Database</strong> (Test Mode).</li>
-                </ol>
-            </div>
-
-            <div class="space-y-2">
-                <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider">Paste Firebase Config (JSON or JS Object)</label>
-                <textarea id="firebase-config-input" rows="6" placeholder='{
-  "apiKey": "AIzaSy...",
-  "authDomain": "your-app.firebaseapp.com",
-  "projectId": "your-app-id",
-  "storageBucket": "your-app.appspot.com",
-  "messagingSenderId": "...",
-  "appId": "..."
-}' class="w-full text-xs font-mono p-3 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 text-forest-800"></textarea>
-            </div>
-
-            <div class="flex justify-between items-center pt-2">
-                <button type="button" onclick="app.clearCloudConfig()" class="text-xs text-rose-600 hover:underline font-bold">
-                    Reset to Local Only
-                </button>
-                <div class="flex space-x-2">
-                    <button type="button" onclick="app.closeModal('modal-cloud-setup')" class="px-3.5 py-2 text-xs font-bold text-slate-600 hover:bg-cream-100 rounded-xl">
-                        Close
-                    </button>
-                    <button type="button" onclick="app.saveCloudConfig()" class="px-4 py-2 bg-yumara-600 hover:bg-yumara-700 text-white font-bold text-xs rounded-xl shadow-md shadow-yumara-600/20">
-                        Connect & Enable Live Cloud
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- MODAL: CREATE SESSION -->
     <div id="modal-create-session" class="fixed inset-0 bg-forest-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -466,18 +411,13 @@
                     <input type="url" id="create-menu-url" placeholder="https://elmenus.com/..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Upload Menu Photo (Optional)</label>
-                    <input type="file" id="create-menu-file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-yumara-50 file:text-yumara-700">
-                </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Delivery Fee (EGP)</label>
                         <input type="number" id="create-delivery-fee" min="0" step="0.5" placeholder="0" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 font-medium text-forest-800">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Tax/Service</label>
+                        <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Tax/Service (EGP)</label>
                         <input type="number" id="create-service-fee" min="0" step="0.5" placeholder="0" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 font-medium text-forest-800">
                     </div>
                 </div>
@@ -521,9 +461,9 @@
             <div class="flex justify-between items-center border-b border-cream-200 pb-3">
                 <h3 class="font-extrabold text-forest-800 text-lg">Order History Archive</h3>
                 <div class="flex items-center space-x-2">
-                    <button onclick="app.clearAllHistory()" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg flex items-center space-x-1">
+                    <button onclick="app.promptClearAllHistory()" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg flex items-center space-x-1">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        <span>Clear All</span>
+                        <span>Clear History</span>
                     </button>
                     <button onclick="app.closeModal('modal-history')" class="text-slate-400 hover:text-slate-600">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -546,57 +486,78 @@
         </div>
     </div>
 
-    <!-- Global Firebase Credentials -->
-    <script>
-      window.__firebase_config = JSON.stringify({
-        apiKey: "AIzaSy...",
-        authDomain: "your-app.firebaseapp.com",
-        projectId: "your-app",
-        storageBucket: "your-app.firebasestorage.app",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:..."
-      });
-    </script>
+    <!-- MODAL: CUSTOM CONFIRMATION MODAL (Replaces window.confirm) -->
+    <div id="modal-custom-confirm" class="fixed inset-0 bg-forest-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-cream-300 space-y-4">
+            <div class="flex items-center space-x-3 text-forest-800">
+                <i data-lucide="help-circle" class="w-6 h-6 text-yumara-600"></i>
+                <h4 id="custom-confirm-title" class="font-extrabold text-base">Confirm Action</h4>
+            </div>
+            <p id="custom-confirm-message" class="text-xs text-slate-600 leading-relaxed">Are you sure you want to proceed?</p>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" id="custom-confirm-cancel-btn" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-cream-100 rounded-xl">Cancel</button>
+                <button type="button" id="custom-confirm-accept-btn" class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm">Confirm</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- Firebase Real-Time Synchronization Module -->
+    <!-- Firebase Async Import Module with Robust Realtime Support -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        window.fbCore = {
-            initializeApp,
-            getAuth,
-            signInAnonymously,
-            signInWithCustomToken,
-            getFirestore,
-            doc,
-            setDoc,
-            deleteDoc,
-            onSnapshot
-        };
+        let db = null;
+        let auth = null;
+        let user = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'food-order-app';
 
-        // Notify client app that module loaded
-        if (window.app && typeof window.app.initFirebase === 'function') {
-            window.app.initFirebase();
+        async function initCloudFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const fbApp = initializeApp(firebaseConfig);
+                    db = getFirestore(fbApp);
+                    auth = getAuth(fbApp);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        try {
+                            const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                            user = cred.user;
+                        } catch (err) {
+                            const cred = await signInAnonymously(auth);
+                            user = cred.user;
+                        }
+                    } else {
+                        const cred = await signInAnonymously(auth);
+                        user = cred.user;
+                    }
+                    console.log("[Firebase] Authenticated successfully, ready for live sync.");
+                }
+            } catch (e) {
+                console.warn("[Firebase] Operating in Local & Broadcast mode:", e);
+            }
+
+            window.firebaseStore = { db, auth, user, appId, doc, setDoc, getDoc, deleteDoc, onSnapshot };
+            
+            // Notify FoodOrderApp that Firebase is authenticated
+            if (window.app && typeof window.app.onCloudReady === 'function') {
+                window.app.onCloudReady();
+            }
         }
+
+        initCloudFirebase();
     </script>
 
-    <!-- Main Application Logic -->
+    <!-- Unified Application Logic -->
     <script>
         class FoodOrderApp {
             constructor() {
-                this.sessionCode = null;
+                this.sessionCode = null; // 6-character clean code (e.g. YUM482)
                 this.broadcastChannel = null;
                 this.fbUnsubscribe = null;
                 this.selectedPaymentMethod = 'InstaPay';
                 this.currentEditingParticipantId = null;
-
-                // Cloud state
-                this.db = null;
-                this.auth = null;
-                this.isCloudActive = false;
-                this.appId = typeof __app_id !== 'undefined' ? __app_id : 'yumara-app';
 
                 this.sessionData = {
                     sessionCode: '',
@@ -606,8 +567,8 @@
                     menuImage: null,
                     deliveryFee: 0,
                     serviceFee: 0,
-                    taxType: 'fixed',
-                    splitMethod: 'equal',
+                    taxType: 'fixed', // 'fixed' or 'percent'
+                    splitMethod: 'equal', // 'equal' or 'proportional'
                     isLocked: false,
                     createdAt: null,
                     presets: [],
@@ -620,135 +581,22 @@
                 
                 document.addEventListener('DOMContentLoaded', () => {
                     lucide.createIcons();
-                    this.initFirebase();
                     this.handleRouting();
                 });
             }
 
-            // -------------------------------------------------------------
-            // FIREBASE & CLOUD INITIALIZATION
-            // -------------------------------------------------------------
-            async initFirebase() {
-                if (!window.fbCore) return;
-
-                let config = null;
-
-                // 1. Check global environment config
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    try {
-                        config = JSON.parse(__firebase_config);
-                    } catch(e) {}
-                }
-
-                // 2. Check user-defined config in localStorage for GitHub Pages
-                if (!config) {
-                    try {
-                        const saved = localStorage.getItem('yumara_custom_firebase_config');
-                        if (saved) config = JSON.parse(saved);
-                    } catch (e) {}
-                }
-
-                if (config && config.projectId) {
-                    try {
-                        const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, getFirestore } = window.fbCore;
-                        const fbApp = initializeApp(config);
-                        this.db = getFirestore(fbApp);
-                        this.auth = getAuth(fbApp);
-
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(this.auth, __initial_auth_token).catch(() => signInAnonymously(this.auth));
-                        } else {
-                            await signInAnonymously(this.auth).catch(() => {});
-                        }
-
-                        this.isCloudActive = true;
-                        this.updateCloudUI(true);
-
-                        // If already on a session, re-attach listener
-                        if (this.sessionCode) {
-                            this.attachCloudListener(this.sessionCode);
-                        }
-                    } catch (err) {
-                        console.warn("Could not connect to Firebase Cloud:", err);
-                        this.isCloudActive = false;
-                        this.updateCloudUI(false);
-                    }
-                } else {
-                    this.updateCloudUI(false);
+            onCloudReady() {
+                const indicator = document.getElementById('sync-status-indicator');
+                if (indicator) indicator.classList.remove('hidden');
+                // Re-bind listener for the active session once authenticated
+                if (this.sessionCode) {
+                    this.listenToSessionCloud(this.sessionCode);
                 }
             }
 
-            updateCloudUI(active) {
-                const dot = document.getElementById('cloud-status-dot');
-                const label = document.getElementById('cloud-status-label');
-                if (active) {
-                    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-                    label.innerText = 'Cloud Live';
-                } else {
-                    dot.className = 'w-2 h-2 rounded-full bg-amber-500';
-                    label.innerText = 'Local Sync';
-                }
-            }
-
-            openCloudSetupModal() {
-                const saved = localStorage.getItem('yumara_custom_firebase_config') || '';
-                document.getElementById('firebase-config-input').value = saved;
-                document.getElementById('modal-cloud-setup').classList.remove('hidden');
-            }
-
-            saveCloudConfig() {
-                const raw = document.getElementById('firebase-config-input').value.trim();
-                if (!raw) {
-                    this.showToast('Please enter your Firebase config', 'error');
-                    return;
-                }
-
-                try {
-                    // Normalize standard JS object strings if users pasted direct JS
-                    let sanitized = raw;
-                    if (!sanitized.startsWith('{')) {
-                        const start = sanitized.indexOf('{');
-                        const end = sanitized.lastIndexOf('}');
-                        if (start !== -1 && end !== -1) {
-                            sanitized = sanitized.substring(start, end + 1);
-                        }
-                    }
-                    // Attempt json or relaxed key quotes
-                    let parsed;
-                    try {
-                        parsed = JSON.parse(sanitized);
-                    } catch (e) {
-                        parsed = Function('"use strict";return (' + sanitized + ')')();
-                    }
-
-                    if (parsed && (parsed.projectId || parsed.apiKey)) {
-                        localStorage.setItem('yumara_custom_firebase_config', JSON.stringify(parsed));
-                        this.closeModal('modal-cloud-setup');
-                        this.showToast('Connecting to Cloud Firestore...', 'info');
-                        this.initFirebase();
-                    } else {
-                        throw new Error('Missing projectId or apiKey');
-                    }
-                } catch (err) {
-                    this.showToast('Invalid Firebase configuration format', 'error');
-                }
-            }
-
-            clearCloudConfig() {
-                localStorage.removeItem('yumara_custom_firebase_config');
-                this.isCloudActive = false;
-                this.db = null;
-                this.updateCloudUI(false);
-                this.closeModal('modal-cloud-setup');
-                this.showToast('Reverted to Local Sync only', 'info');
-            }
-
-            // -------------------------------------------------------------
-            // REAL-TIME SYNC ENGINE
-            // -------------------------------------------------------------
             initBroadcastChannel() {
                 try {
-                    this.broadcastChannel = new BroadcastChannel('yumara_food_sync');
+                    this.broadcastChannel = new BroadcastChannel('food_order_sync');
                     this.broadcastChannel.onmessage = (event) => {
                         if (event.data && event.data.sessionCode === this.sessionCode) {
                             this.sessionData = event.data.sessionData;
@@ -767,89 +615,7 @@
                 }
             }
 
-            attachCloudListener(code) {
-                if (!this.db || !window.fbCore) return;
-
-                const { doc, onSnapshot } = window.fbCore;
-                const sessionDoc = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'food_sessions', code);
-
-                if (this.fbUnsubscribe) {
-                    this.fbUnsubscribe();
-                }
-
-                this.fbUnsubscribe = onSnapshot(sessionDoc, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const remoteData = snapshot.data();
-                        this.sessionData = remoteData;
-                        this.saveSessionToLocalStorage();
-                        this.renderSessionBoard();
-                    }
-                }, (err) => {
-                    console.warn("Cloud sync snapshot error:", err);
-                });
-            }
-
-            async syncToCloud() {
-                if (!this.db || !window.fbCore || !this.sessionCode) return;
-
-                try {
-                    const { doc, setDoc } = window.fbCore;
-                    const sessionDoc = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'food_sessions', this.sessionCode);
-                    const cleanData = JSON.parse(JSON.stringify(this.sessionData));
-                    await setDoc(sessionDoc, cleanData, { merge: true });
-                } catch (err) {
-                    console.warn("Failed to push update to cloud:", err);
-                }
-            }
-
-            async saveSessionData() {
-                this.saveSessionToLocalStorage();
-
-                // 1. Broadcast immediately to open tabs in same browser
-                if (this.broadcastChannel) {
-                    this.broadcastChannel.postMessage({
-                        sessionCode: this.sessionCode,
-                        sessionData: this.sessionData
-                    });
-                }
-
-                // 2. Push to Firestore for cross-device updates
-                await this.syncToCloud();
-            }
-
-            saveSessionToLocalStorage() {
-                try {
-                    localStorage.setItem(`food_session_${this.sessionCode}`, JSON.stringify(this.sessionData));
-                    
-                    const history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                    const existingIdx = history.findIndex(h => (h.sessionCode || h.id) === this.sessionCode);
-                    const historyEntry = { id: this.sessionCode, ...this.sessionData };
-
-                    if (existingIdx >= 0) {
-                        history[existingIdx] = historyEntry;
-                    } else {
-                        history.unshift(historyEntry);
-                    }
-
-                    localStorage.setItem('food_sessions_archive', JSON.stringify(history.slice(0, 30)));
-                } catch (e) {}
-            }
-
-            loadSessionState(code) {
-                const localData = localStorage.getItem(`food_session_${code}`);
-                if (localData) {
-                    try {
-                        this.sessionData = JSON.parse(localData);
-                    } catch (e) {}
-                }
-
-                // Attach real-time cloud listener
-                this.attachCloudListener(code);
-            }
-
-            // -------------------------------------------------------------
-            // CODE & LINK ROUTING
-            // -------------------------------------------------------------
+            // Generate clean 6-character uppercase alphanumeric code (e.g. YUM482)
             generateShortCode() {
                 const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
                 let code = '';
@@ -866,13 +632,13 @@
             copyUniversalShareLink() {
                 const url = this.getUniversalShareURL();
                 this.fallbackCopyText(url);
-                this.showToast('Copied universal session link for everyone!', 'success');
+                this.showToast('Copied universal link! Send to your group.', 'success');
             }
 
             copySessionCode() {
                 if (this.sessionCode) {
                     this.fallbackCopyText(this.sessionCode);
-                    this.showToast(`Copied session code: ${this.sessionCode}`, 'success');
+                    this.showToast(`Copied code: ${this.sessionCode}`, 'success');
                 }
             }
 
@@ -885,6 +651,148 @@
                 window.location.hash = `#session=${input}`;
             }
 
+            // -------------------------------------------------------------
+            // SESSION CREATION & STORAGE (MANDATORY RULE 1 COMPLIANT)
+            // -------------------------------------------------------------
+            async handleCreateSession(event) {
+                if (event) event.preventDefault();
+                
+                const submitBtn = document.getElementById('btn-submit-create');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = 'Creating Session...';
+                }
+
+                try {
+                    const restName = document.getElementById('create-restaurant-name').value.trim();
+                    const adminName = document.getElementById('create-admin-name').value.trim();
+                    const menuUrl = document.getElementById('create-menu-url').value.trim();
+                    const deliveryFee = parseFloat(document.getElementById('create-delivery-fee').value) || 0;
+                    const serviceFee = parseFloat(document.getElementById('create-service-fee').value) || 0;
+
+                    this.sessionCode = this.generateShortCode();
+
+                    this.sessionData = {
+                        sessionCode: this.sessionCode,
+                        restaurantName: restName,
+                        adminName: adminName,
+                        menuUrl: menuUrl,
+                        menuImage: null,
+                        deliveryFee: deliveryFee,
+                        serviceFee: serviceFee,
+                        taxType: 'fixed',
+                        splitMethod: 'equal',
+                        isLocked: false,
+                        createdAt: new Date().toISOString(),
+                        presets: [],
+                        participants: []
+                    };
+
+                    this.saveSessionToLocalArchive();
+                    await this.syncToFirebase();
+
+                    this.closeModal('modal-create-session');
+                    window.location.hash = `#session=${this.sessionCode}`;
+                    this.showToast(`Group order ${this.sessionCode} created live!`, 'success');
+
+                } catch (err) {
+                    console.error('Session creation error:', err);
+                    this.showToast('Failed to create session. Please try again.', 'error');
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i><span>Create Live Session</span>`;
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            async saveSessionData() {
+                this.saveSessionToLocalArchive();
+
+                if (this.broadcastChannel) {
+                    this.broadcastChannel.postMessage({
+                        sessionCode: this.sessionCode,
+                        sessionData: this.sessionData
+                    });
+                }
+
+                await this.syncToFirebase();
+            }
+
+            saveSessionToLocalArchive() {
+                try {
+                    localStorage.setItem(`food_session_${this.sessionCode}`, JSON.stringify(this.sessionData));
+                    
+                    const history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
+                    const existingIdx = history.findIndex(h => h.sessionCode === this.sessionCode || h.id === this.sessionCode);
+                    const historyEntry = { id: this.sessionCode, ...this.sessionData };
+
+                    if (existingIdx >= 0) {
+                        history[existingIdx] = historyEntry;
+                    } else {
+                        history.unshift(historyEntry);
+                    }
+
+                    localStorage.setItem('food_sessions_archive', JSON.stringify(history.slice(0, 30)));
+                } catch (e) {}
+            }
+
+            // Syncs order state instantly to Firebase Firestore under RULE 1 public path
+            async syncToFirebase() {
+                if (window.firebaseStore && window.firebaseStore.db && this.sessionCode) {
+                    try {
+                        const { db, appId, doc, setDoc } = window.firebaseStore;
+                        // RULE 1: /artifacts/{appId}/public/data/{collectionName}/{documentId}
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'food_sessions', this.sessionCode);
+                        await setDoc(docRef, this.sessionData, { merge: true });
+                    } catch (e) {
+                        console.error("Firebase sync error:", e);
+                    }
+                }
+            }
+
+            // Real-time listener: changes made by anyone reflect across all screens immediately
+            listenToSessionCloud(code) {
+                if (this.fbUnsubscribe) {
+                    this.fbUnsubscribe();
+                    this.fbUnsubscribe = null;
+                }
+
+                if (window.firebaseStore && window.firebaseStore.db) {
+                    try {
+                        const { db, appId, doc, onSnapshot } = window.firebaseStore;
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'food_sessions', code);
+                        
+                        this.fbUnsubscribe = onSnapshot(docRef, (snap) => {
+                            if (snap.exists()) {
+                                this.sessionData = snap.data();
+                                this.saveSessionToLocalArchive();
+                                this.renderSessionBoard();
+                            }
+                        }, (err) => {
+                            console.warn("Real-time listener callback error:", err);
+                        });
+                    } catch (e) {
+                        console.error("Error setting onSnapshot listener:", e);
+                    }
+                }
+            }
+
+            loadSessionState(code) {
+                const localData = localStorage.getItem(`food_session_${code}`);
+                if (localData) {
+                    try {
+                        this.sessionData = JSON.parse(localData);
+                    } catch (e) {}
+                }
+
+                this.listenToSessionCloud(code);
+            }
+
+            // -------------------------------------------------------------
+            // ROUTING & NAVIGATION
+            // -------------------------------------------------------------
             handleRouting() {
                 const hash = window.location.hash.substring(1);
                 const params = new URLSearchParams(hash);
@@ -895,6 +803,10 @@
                     this.loadSessionState(this.sessionCode);
                     this.renderSessionBoard();
                 } else {
+                    if (this.fbUnsubscribe) {
+                        this.fbUnsubscribe();
+                        this.fbUnsubscribe = null;
+                    }
                     this.showLandingView();
                 }
             }
@@ -969,7 +881,7 @@
             }
 
             // -------------------------------------------------------------
-            // BOARD RENDERING
+            // UNIVERSAL COLLABORATIVE BOARD RENDERING
             // -------------------------------------------------------------
             renderSessionBoard() {
                 document.getElementById('view-landing').classList.add('hidden');
@@ -998,7 +910,7 @@
                     submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
 
-                // Menu links
+                // Menu link & photo
                 const linkBtn = document.getElementById('session-menu-link-btn');
                 if (this.sessionData.menuUrl) {
                     linkBtn.href = this.sessionData.menuUrl;
@@ -1014,9 +926,15 @@
                     imgBtn.classList.add('hidden');
                 }
 
-                // Admin inputs sync
-                document.getElementById('admin-input-delivery').value = this.sessionData.deliveryFee || '';
-                document.getElementById('admin-input-tax').value = this.sessionData.serviceFee || '';
+                // Admin fields sync
+                const delInput = document.getElementById('admin-input-delivery');
+                if (document.activeElement !== delInput) {
+                    delInput.value = this.sessionData.deliveryFee || '';
+                }
+                const taxInput = document.getElementById('admin-input-tax');
+                if (document.activeElement !== taxInput) {
+                    taxInput.value = this.sessionData.serviceFee || '';
+                }
                 document.getElementById('admin-select-split').value = this.sessionData.splitMethod || 'equal';
                 this.updateTaxTypeUI(this.sessionData.taxType || 'fixed');
 
@@ -1058,7 +976,7 @@
 
                 countBadge.innerText = `${breakdown.count} Order${breakdown.count === 1 ? '' : 's'}`;
 
-                // Summary figures
+                // Totals summary
                 document.getElementById('summary-subtotal').innerText = breakdown.groupSubtotal.toFixed(2) + ' EGP';
                 document.getElementById('summary-delivery').innerText = breakdown.deliveryTotal.toFixed(2) + ' EGP';
                 document.getElementById('summary-tax').innerText = breakdown.totalTaxEgp.toFixed(2) + ' EGP';
@@ -1070,7 +988,7 @@
                 document.getElementById('summary-split-explanation').innerText = splitDesc;
 
                 if (breakdown.count === 0) {
-                    container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">No orders submitted yet. Fill in your name and food items above to join the board!</p>`;
+                    container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">No orders submitted yet. Enter your name and items above to place the first order!</p>`;
                     return;
                 }
 
@@ -1082,7 +1000,7 @@
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.paymentMethod === 'Cash' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
                                     ${p.paymentMethod || 'InstaPay'}
                                 </span>
-                                <button onclick="app.togglePaymentStatus('${p.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${p.isPaid ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">
+                                <button onclick="app.togglePaymentStatus('${p.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold transition-transform active:scale-95 ${p.isPaid ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">
                                     ${p.isPaid ? 'PAID ✓' : 'UNPAID'}
                                 </button>
                             </div>
@@ -1109,7 +1027,7 @@
                                 <i data-lucide="pencil" class="w-3 h-3"></i>
                                 <span>Edit This Order</span>
                             </button>
-                            <button onclick="app.removeParticipantOrder('${p.id}')" class="text-rose-600 hover:underline font-semibold flex items-center space-x-1">
+                            <button onclick="app.promptRemoveParticipant('${p.id}')" class="text-rose-600 hover:underline font-semibold flex items-center space-x-1">
                                 <i data-lucide="trash-2" class="w-3 h-3"></i>
                                 <span>Remove</span>
                             </button>
@@ -1121,7 +1039,7 @@
             }
 
             // -------------------------------------------------------------
-            // ORDER FORM INTERACTIONS
+            // ORDER FORM INTERACTIONS & ITEM ROWS
             // -------------------------------------------------------------
             setOrderPaymentMethod(method) {
                 this.selectedPaymentMethod = method;
@@ -1145,11 +1063,11 @@
                 row.id = rowId;
                 row.className = 'flex items-center space-x-2 bg-cream-50 p-2 rounded-xl border border-cream-300';
                 row.innerHTML = `
-                    <input type="text" placeholder="Food item name" value="${this.escapeHtml(name)}" class="item-name-input flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white font-medium text-forest-800">
-                    <input type="number" placeholder="Price" min="0" step="0.5" value="${price}" class="item-price-input w-20 text-xs px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white font-bold text-forest-800">
+                    <input type="text" placeholder="Food item name" value="${this.escapeHtml(name)}" class="item-name-input flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white font-medium text-forest-800 focus:outline-none focus:ring-1 focus:ring-yumara-500">
+                    <input type="number" placeholder="Price" min="0" step="0.5" value="${price}" class="item-price-input w-20 text-xs px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white font-bold text-forest-800 focus:outline-none focus:ring-1 focus:ring-yumara-500">
                     <div class="flex items-center space-x-1">
                         <span class="text-[10px] text-slate-400 font-bold">x</span>
-                        <input type="number" min="1" value="${qty}" class="item-qty-input w-12 text-xs px-2 py-1.5 rounded-lg border border-cream-300 bg-white text-center font-bold text-forest-800">
+                        <input type="number" min="1" value="${qty}" class="item-qty-input w-12 text-xs px-2 py-1.5 rounded-lg border border-cream-300 bg-white text-center font-bold text-forest-800 focus:outline-none focus:ring-1 focus:ring-yumara-500">
                     </div>
                     <button type="button" onclick="app.removeBoardItemRow('${rowId}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -1240,12 +1158,18 @@
                 const items = [];
 
                 rows.forEach(row => {
-                    const itemName = row.querySelector('.item-name-input').value.trim();
-                    const itemPrice = parseFloat(row.querySelector('.item-price-input').value) || 0;
-                    const itemQty = parseInt(row.querySelector('.item-qty-input').value) || 1;
+                    const nameInput = row.querySelector('.item-name-input');
+                    const priceInput = row.querySelector('.item-price-input');
+                    const qtyInput = row.querySelector('.item-qty-input');
 
-                    if (itemName && itemPrice >= 0) {
-                        items.push({ name: itemName, price: itemPrice, qty: itemQty });
+                    if (nameInput && priceInput && qtyInput) {
+                        const itemName = nameInput.value.trim();
+                        const itemPrice = parseFloat(priceInput.value) || 0;
+                        const itemQty = parseInt(qtyInput.value) || 1;
+
+                        if (itemName && itemPrice >= 0) {
+                            items.push({ name: itemName, price: itemPrice, qty: itemQty });
+                        }
                     }
                 });
 
@@ -1255,8 +1179,8 @@
                 }
 
                 const participants = [...(this.sessionData.participants || [])];
-                let targetIndex = -1;
 
+                let targetIndex = -1;
                 if (this.currentEditingParticipantId) {
                     targetIndex = participants.findIndex(p => p.id === this.currentEditingParticipantId);
                 } else {
@@ -1296,17 +1220,21 @@
                 }
             }
 
-            async removeParticipantOrder(id) {
-                this.sessionData.participants = this.sessionData.participants.filter(p => p.id !== id);
-                await this.saveSessionData();
-                this.showToast('Order removed from board', 'info');
-                if (this.currentEditingParticipantId === id) {
-                    this.resetOrderForm();
-                }
+            promptRemoveParticipant(id) {
+                const p = (this.sessionData.participants || []).find(x => x.id === id);
+                const name = p ? p.name : 'this order';
+                this.showConfirmDialog(`Remove Order?`, `Are you sure you want to remove ${name}'s order from the session?`, async () => {
+                    this.sessionData.participants = this.sessionData.participants.filter(item => item.id !== id);
+                    await this.saveSessionData();
+                    this.showToast('Order removed', 'info');
+                    if (this.currentEditingParticipantId === id) {
+                        this.resetOrderForm();
+                    }
+                });
             }
 
             // -------------------------------------------------------------
-            // ADMIN CONTROLS
+            // ADMIN CONTROLS & SETTINGS
             // -------------------------------------------------------------
             toggleAdminMode() {
                 const panel = document.getElementById('admin-panel');
@@ -1434,7 +1362,7 @@
                                 <button onclick="app.loadHistoricalSession('${code}')" class="px-3 py-1.5 bg-yumara-600 hover:bg-yumara-700 text-white text-xs font-bold rounded-lg shadow-sm">
                                     Open
                                 </button>
-                                <button onclick="app.deleteHistoricalSession('${code}')" class="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors" title="Delete Session">
+                                <button onclick="app.promptDeleteHistoricalSession('${code}')" class="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors" title="Delete Session">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -1445,41 +1373,45 @@
                 lucide.createIcons();
             }
 
-            async deleteHistoricalSession(code) {
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                } catch (e) {}
-
-                history = history.filter(item => (item.sessionCode || item.id) !== code);
-                localStorage.setItem('food_sessions_archive', JSON.stringify(history));
-                localStorage.removeItem(`food_session_${code}`);
-
-                if (this.db && window.fbCore) {
+            promptDeleteHistoricalSession(code) {
+                this.showConfirmDialog(`Delete Session ${code}?`, `This will remove the session from your history archive.`, async () => {
+                    let history = [];
                     try {
-                        const { doc, deleteDoc } = window.fbCore;
-                        const sessionDoc = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'food_sessions', code);
-                        await deleteDoc(sessionDoc);
+                        history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
                     } catch (e) {}
-                }
 
-                this.showToast('Session deleted', 'info');
-                this.renderHistoryList();
+                    history = history.filter(item => (item.sessionCode || item.id) !== code);
+                    localStorage.setItem('food_sessions_archive', JSON.stringify(history));
+                    localStorage.removeItem(`food_session_${code}`);
+
+                    if (window.firebaseStore && window.firebaseStore.db) {
+                        try {
+                            const { db, appId, doc, deleteDoc } = window.firebaseStore;
+                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'food_sessions', code);
+                            await deleteDoc(docRef);
+                        } catch (e) {}
+                    }
+
+                    this.showToast('Session deleted', 'info');
+                    this.renderHistoryList();
+                });
             }
 
-            clearAllHistory() {
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                } catch (e) {}
+            promptClearAllHistory() {
+                this.showConfirmDialog('Clear All History?', 'Are you sure you want to clear ALL past session history? This cannot be undone.', async () => {
+                    let history = [];
+                    try {
+                        history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
+                    } catch (e) {}
 
-                history.forEach(item => {
-                    localStorage.removeItem(`food_session_${item.sessionCode || item.id}`);
+                    history.forEach(item => {
+                        localStorage.removeItem(`food_session_${item.sessionCode || item.id}`);
+                    });
+
+                    localStorage.removeItem('food_sessions_archive');
+                    this.showToast('History cleared', 'info');
+                    this.renderHistoryList();
                 });
-
-                localStorage.removeItem('food_sessions_archive');
-                this.showToast('History cleared', 'info');
-                this.renderHistoryList();
             }
 
             loadHistoricalSession(code) {
@@ -1488,11 +1420,37 @@
             }
 
             // -------------------------------------------------------------
-            // UTILITIES
+            // MODAL DIALOGS & UTILITIES (No window.confirm or alert used)
             // -------------------------------------------------------------
+            showConfirmDialog(title, message, onConfirm) {
+                const modal = document.getElementById('modal-custom-confirm');
+                document.getElementById('custom-confirm-title').innerText = title;
+                document.getElementById('custom-confirm-message').innerText = message;
+
+                const acceptBtn = document.getElementById('custom-confirm-accept-btn');
+                const cancelBtn = document.getElementById('custom-confirm-cancel-btn');
+
+                const cleanup = () => {
+                    modal.classList.add('hidden');
+                    acceptBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                };
+
+                acceptBtn.onclick = () => {
+                    cleanup();
+                    if (typeof onConfirm === 'function') onConfirm();
+                };
+
+                cancelBtn.onclick = cleanup;
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            }
+
             fallbackCopyText(text) {
                 const textArea = document.createElement("textarea");
                 textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
                 document.body.appendChild(textArea);
                 textArea.select();
                 try {
@@ -1529,17 +1487,8 @@
                 setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
                 setTimeout(() => {
                     toast.classList.add('opacity-0', 'translate-y-2');
-                    setTimeout(() => toast.remove(), 200);
+                    setTimeout(() => toast.remove(), 250);
                 }, 3000);
-            }
-
-            readFileAsBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                    reader.readAsDataURL(file);
-                });
             }
 
             escapeHtml(str) {
