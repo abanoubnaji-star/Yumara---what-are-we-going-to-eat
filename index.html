@@ -86,8 +86,8 @@
                 <!-- Navigation Controls -->
                 <div class="flex items-center space-x-2">
                     <div id="sync-status-indicator" class="inline-flex items-center space-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-cream-200 text-forest-800 border border-cream-300">
-                        <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="sync-status-text">Live Sync SSE</span>
+                        <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span id="sync-status-text">Connecting Firestore...</span>
                     </div>
 
                     <button onclick="app.openHistoryModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-yumara-800 bg-cream-200 hover:bg-cream-300 rounded-lg transition-colors border border-cream-300">
@@ -118,9 +118,9 @@
             
             <div>
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 tracking-tight">What Are We Going to Eat?</h2>
-                <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mt-1">Live Multi-User Food Ordering • Powered by yumara</p>
+                <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mt-1">Live Multi-User Food Ordering • Powered by Firebase</p>
                 <p class="text-slate-600 mt-3 text-sm leading-relaxed max-w-md mx-auto">
-                    Real-time cloud sync across everyone’s phones &amp; laptops. Add orders, split delivery &amp; taxes in <strong>EGP (ج.م)</strong>, and track payments seamlessly.
+                    Real-time cloud database sync across everyone’s phones &amp; laptops. Add orders, split delivery &amp; taxes in <strong>EGP (ج.م)</strong>, and track payments seamlessly.
                 </p>
             </div>
 
@@ -496,15 +496,33 @@
         </div>
     </div>
 
-    <!-- Application Logic with NTFY SSE Live Sync -->
-    <script>
+    <!-- Firebase SDK Imports & Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Provided Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_AIxDvI_BCGJpwbec5iKDHp-rLIv1jGY",
+            authDomain: "yuma-b8b10.firebaseapp.com",
+            projectId: "yuma-b8b10",
+            storageBucket: "yuma-b8b10.firebasestorage.app",
+            messagingSenderId: "442514211341",
+            appId: "1:442514211341:web:33b789eec74e8ba3830b44"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
+
         class FoodOrderApp {
             constructor() {
-                this.sessionCode = null; // 6-character clean code (e.g. YUM482)
-                this.broadcastChannel = null;
-                this.eventSource = null;
+                this.sessionCode = null;
                 this.selectedPaymentMethod = 'InstaPay';
                 this.currentEditingParticipantId = null;
+                this.firestoreUnsubscribe = null;
+                this.user = null;
 
                 this.sessionData = {
                     sessionCode: '',
@@ -522,9 +540,8 @@
                     participants: []
                 };
 
-                this.initBroadcastChannel();
+                this.initAuth();
                 window.addEventListener('hashchange', () => this.handleRouting());
-                window.addEventListener('storage', (e) => this.handleStorageEvent(e));
                 
                 document.addEventListener('DOMContentLoaded', () => {
                     lucide.createIcons();
@@ -532,117 +549,77 @@
                 });
             }
 
-            initBroadcastChannel() {
+            async initAuth() {
                 try {
-                    this.broadcastChannel = new BroadcastChannel('food_order_sync');
-                    this.broadcastChannel.onmessage = (event) => {
-                        if (event.data && event.data.sessionCode === this.sessionCode) {
-                            this.sessionData = event.data.sessionData;
-                            this.renderSessionBoard();
-                        }
-                    };
-                } catch (e) {}
-            }
-
-            handleStorageEvent(e) {
-                if (e.key === `food_session_${this.sessionCode}` && e.newValue) {
-                    try {
-                        this.sessionData = JSON.parse(e.newValue);
-                        this.renderSessionBoard();
-                    } catch (err) {}
+                    const userCredential = await signInAnonymously(auth);
+                    this.user = userCredential.user;
+                    this.updateSyncBadge('Connected: Firestore Live', 'bg-emerald-500');
+                    // If session was already loaded via hash prior to auth resolving
+                    if (this.sessionCode && !this.firestoreUnsubscribe) {
+                        this.bindFirestoreListener(this.sessionCode);
+                    }
+                } catch (e) {
+                    console.error("Firebase auth error:", e);
+                    this.updateSyncBadge('Sync Offline', 'bg-rose-500');
                 }
             }
 
-            // -------------------------------------------------------------
-            // SSE & NTFY REALTIME SYNC INTEGRATION
-            // -------------------------------------------------------------
-            getNtfyTopic() {
-                return `yumara-order-room-${(this.sessionCode || 'default').toLowerCase()}`;
-            }
-
-            initEventSource(code) {
-                if (this.eventSource) {
-                    this.eventSource.close();
-                    this.eventSource = null;
-                }
-
-                const topic = `yumara-order-room-${code.toLowerCase()}`;
+            updateSyncBadge(text, dotColorClass) {
                 const syncStatusText = document.getElementById('sync-status-text');
                 const syncDot = document.getElementById('sync-dot');
-
-                try {
-                    this.eventSource = new EventSource(`https://ntfy.sh/${topic}/sse?since=12h`);
-
-                    this.eventSource.onopen = () => {
-                        if (syncStatusText) syncStatusText.innerText = 'Connected: SSE Live';
-                        if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-                    };
-
-                    this.eventSource.onerror = () => {
-                        if (syncStatusText) syncStatusText.innerText = 'Sync Reconnecting...';
-                        if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-                    };
-
-                    this.eventSource.onmessage = (event) => {
-                        try {
-                            const data = JSON.parse(event.data);
-                            if (data.event === "message" && data.message) {
-                                const payload = JSON.parse(data.message);
-                                this.handleIncomingRemoteMessage(payload);
-                            }
-                        } catch (err) {
-                            // Non-JSON ping or malformed event
-                        }
-                    };
-                } catch (e) {
-                    console.warn("EventSource setup error:", e);
-                }
+                if (syncStatusText) syncStatusText.innerText = text;
+                if (syncDot) syncDot.className = `w-2 h-2 rounded-full ${dotColorClass} animate-pulse`;
             }
 
-            handleIncomingRemoteMessage(payload) {
-                if (!payload || !payload.type) return;
+            getFirestoreSessionDoc(code) {
+                return doc(db, 'food_orders_sessions', code.toUpperCase());
+            }
 
-                if (payload.type === 'NEW_ORDER') {
-                    const incomingParticipant = payload.participant;
-                    if (!incomingParticipant) return;
+            bindFirestoreListener(code) {
+                if (this.firestoreUnsubscribe) {
+                    this.firestoreUnsubscribe();
+                    this.firestoreUnsubscribe = null;
+                }
 
-                    const participants = [...(this.sessionData.participants || [])];
-                    const existingIndex = participants.findIndex(p => p.id === incomingParticipant.id || p.name.toLowerCase() === incomingParticipant.name.toLowerCase());
+                if (!this.user) {
+                    return;
+                }
 
-                    if (existingIndex >= 0) {
-                        participants[existingIndex] = incomingParticipant;
-                    } else {
-                        participants.push(incomingParticipant);
-                    }
-
-                    this.sessionData.participants = participants;
-                    this.saveSessionToLocalArchive();
-                    this.renderSessionBoard();
-                    this.showToast(`New update: ${incomingParticipant.name}'s order arrived!`, 'info');
-                } else if (payload.type === 'SESSION_UPDATE') {
-                    if (payload.sessionData && payload.sessionData.sessionCode === this.sessionCode) {
-                        this.sessionData = payload.sessionData;
-                        this.saveSessionToLocalArchive();
+                const docRef = this.getFirestoreSessionDoc(code);
+                this.firestoreUnsubscribe = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const remoteData = docSnap.data();
+                        this.sessionData = remoteData;
+                        this.saveSessionToLocalArchive(false);
                         this.renderSessionBoard();
+                        this.updateSyncBadge('Connected: Firestore Live', 'bg-emerald-500');
+                    } else {
+                        // Check if we have locally cached data
+                        const localData = this.getLocalSession(code);
+                        if (localData) {
+                            this.sessionData = localData;
+                            this.saveSessionDataToFirestore();
+                        } else {
+                            this.showToast(`Session ${code} not found on cloud`, 'info');
+                        }
                     }
-                }
+                }, (error) => {
+                    console.error("Firestore listen error:", error);
+                    this.updateSyncBadge('Reconnecting Firestore...', 'bg-amber-500');
+                });
             }
 
-            async broadcastToNtfy(payload) {
+            async saveSessionDataToFirestore() {
                 if (!this.sessionCode) return;
-                const topic = this.getNtfyTopic();
                 try {
-                    await fetch(`https://ntfy.sh/${topic}`, {
-                        method: 'POST',
-                        headers: { 'Title': 'Food Order Update' },
-                        body: JSON.stringify(payload)
-                    });
-                } catch (e) {
-                    console.warn('NTFY broadcast failed:', e);
+                    const docRef = this.getFirestoreSessionDoc(this.sessionCode);
+                    await setDoc(docRef, this.sessionData, { merge: true });
+                } catch (err) {
+                    console.error("Error writing session to Firestore:", err);
+                    this.showToast('Failed to sync changes with cloud database', 'error');
                 }
             }
 
-            // Generate clean 6-character uppercase alphanumeric code
             generateShortCode() {
                 const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
                 let code = '';
@@ -678,9 +655,6 @@
                 window.location.hash = `#session=${input}`;
             }
 
-            // -------------------------------------------------------------
-            // SESSION CREATION & LOCAL STORAGE
-            // -------------------------------------------------------------
             async handleCreateSession(event) {
                 if (event) event.preventDefault();
                 
@@ -715,15 +689,12 @@
                         participants: []
                     };
 
-                    this.saveSessionToLocalArchive();
-                    await this.broadcastToNtfy({
-                        type: 'SESSION_UPDATE',
-                        sessionData: this.sessionData
-                    });
+                    this.saveSessionToLocalArchive(true);
+                    await this.saveSessionDataToFirestore();
 
                     this.closeModal('modal-create-session');
                     window.location.hash = `#session=${this.sessionCode}`;
-                    this.showToast(`Group order ${this.sessionCode} created live!`, 'success');
+                    this.showToast(`Group order ${this.sessionCode} created!`, 'success');
 
                 } catch (err) {
                     console.error('Session creation error:', err);
@@ -737,57 +708,43 @@
                 }
             }
 
-            async saveSessionData(broadcastPayload = null) {
-                this.saveSessionToLocalArchive();
-
-                if (this.broadcastChannel) {
-                    this.broadcastChannel.postMessage({
-                        sessionCode: this.sessionCode,
-                        sessionData: this.sessionData
-                    });
-                }
-
-                if (broadcastPayload) {
-                    await this.broadcastToNtfy(broadcastPayload);
-                } else {
-                    await this.broadcastToNtfy({
-                        type: 'SESSION_UPDATE',
-                        sessionData: this.sessionData
-                    });
+            getLocalSession(code) {
+                try {
+                    const localData = localStorage.getItem(`food_session_${code}`);
+                    return localData ? JSON.parse(localData) : null;
+                } catch (e) {
+                    return null;
                 }
             }
 
-            saveSessionToLocalArchive() {
+            saveSessionToLocalArchive(updateArchiveList = true) {
                 try {
                     localStorage.setItem(`food_session_${this.sessionCode}`, JSON.stringify(this.sessionData));
                     
-                    const history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                    const existingIdx = history.findIndex(h => h.sessionCode === this.sessionCode || h.id === this.sessionCode);
-                    const historyEntry = { id: this.sessionCode, ...this.sessionData };
+                    if (updateArchiveList) {
+                        const history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
+                        const existingIdx = history.findIndex(h => h.sessionCode === this.sessionCode || h.id === this.sessionCode);
+                        const historyEntry = { id: this.sessionCode, ...this.sessionData };
 
-                    if (existingIdx >= 0) {
-                        history[existingIdx] = historyEntry;
-                    } else {
-                        history.unshift(historyEntry);
+                        if (existingIdx >= 0) {
+                            history[existingIdx] = historyEntry;
+                        } else {
+                            history.unshift(historyEntry);
+                        }
+
+                        localStorage.setItem('food_sessions_archive', JSON.stringify(history.slice(0, 30)));
                     }
-
-                    localStorage.setItem('food_sessions_archive', JSON.stringify(history.slice(0, 30)));
                 } catch (e) {}
             }
 
             loadSessionState(code) {
-                const localData = localStorage.getItem(`food_session_${code}`);
+                const localData = this.getLocalSession(code);
                 if (localData) {
-                    try {
-                        this.sessionData = JSON.parse(localData);
-                    } catch (e) {}
+                    this.sessionData = localData;
                 }
-                this.initEventSource(code);
+                this.bindFirestoreListener(code);
             }
 
-            // -------------------------------------------------------------
-            // ROUTING & NAVIGATION
-            // -------------------------------------------------------------
             handleRouting() {
                 const hash = window.location.hash.substring(1);
                 const params = new URLSearchParams(hash);
@@ -798,9 +755,9 @@
                     this.loadSessionState(this.sessionCode);
                     this.renderSessionBoard();
                 } else {
-                    if (this.eventSource) {
-                        this.eventSource.close();
-                        this.eventSource = null;
+                    if (this.firestoreUnsubscribe) {
+                        this.firestoreUnsubscribe();
+                        this.firestoreUnsubscribe = null;
                     }
                     this.showLandingView();
                 }
@@ -816,9 +773,6 @@
                 document.getElementById('view-session').classList.add('hidden');
             }
 
-            // -------------------------------------------------------------
-            // FINANCIAL BREAKDOWNS (Equal vs Proportional in EGP)
-            // -------------------------------------------------------------
             computeBreakdowns() {
                 const participants = this.sessionData.participants || [];
                 const count = participants.length;
@@ -875,9 +829,6 @@
                 };
             }
 
-            // -------------------------------------------------------------
-            // UNIVERSAL COLLABORATIVE BOARD RENDERING
-            // -------------------------------------------------------------
             renderSessionBoard() {
                 document.getElementById('view-landing').classList.add('hidden');
                 document.getElementById('view-session').classList.remove('hidden');
@@ -886,7 +837,6 @@
                 document.getElementById('session-restaurant-name').innerText = this.sessionData.restaurantName || 'Restaurant Order';
                 document.getElementById('session-organizer-info').innerText = `Organized by ${this.sessionData.adminName || 'Organizer'}`;
 
-                // Lock status
                 const lockBadge = document.getElementById('session-lock-badge');
                 const lockBtnText = document.getElementById('admin-lock-btn-text');
                 const submitBtn = document.getElementById('btn-submit-order');
@@ -898,14 +848,13 @@
                     submitBtn.disabled = true;
                     submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
-                    lockBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live & Open`;
+                    lockBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live &amp; Open`;
                     lockBadge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1';
                     lockBtnText.innerText = 'Lock Orders';
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
 
-                // Menu link & photo
                 const linkBtn = document.getElementById('session-menu-link-btn');
                 if (this.sessionData.menuUrl) {
                     linkBtn.href = this.sessionData.menuUrl;
@@ -921,7 +870,6 @@
                     imgBtn.classList.add('hidden');
                 }
 
-                // Admin fields sync
                 const delInput = document.getElementById('admin-input-delivery');
                 if (document.activeElement !== delInput) {
                     delInput.value = this.sessionData.deliveryFee || '';
@@ -971,7 +919,6 @@
 
                 countBadge.innerText = `${breakdown.count} Order${breakdown.count === 1 ? '' : 's'}`;
 
-                // Totals summary
                 document.getElementById('summary-subtotal').innerText = breakdown.groupSubtotal.toFixed(2) + ' EGP';
                 document.getElementById('summary-delivery').innerText = breakdown.deliveryTotal.toFixed(2) + ' EGP';
                 document.getElementById('summary-tax').innerText = breakdown.totalTaxEgp.toFixed(2) + ' EGP';
@@ -1005,7 +952,6 @@
                             </div>
                         </div>
 
-                        <!-- Itemized list -->
                         <div class="bg-cream-50 rounded-xl p-2.5 text-xs space-y-1 border border-cream-200">
                             ${p.items.map(i => `
                                 <div class="flex justify-between text-forest-800 font-medium">
@@ -1016,7 +962,6 @@
                             ${p.note ? `<p class="text-[11px] text-yumara-700 italic pt-1 border-t border-cream-300 mt-1">Note: ${this.escapeHtml(p.note)}</p>` : ''}
                         </div>
 
-                        <!-- Universal Edit / Remove Buttons -->
                         <div class="flex justify-end items-center space-x-2 text-[11px]">
                             <button onclick="app.editParticipantOrder('${p.id}')" class="text-forest-800 hover:text-forest-900 font-bold inline-flex items-center space-x-1 bg-cream-200 px-2.5 py-1 rounded-md border border-cream-300">
                                 <i data-lucide="pencil" class="w-3 h-3"></i>
@@ -1033,9 +978,6 @@
                 lucide.createIcons();
             }
 
-            // -------------------------------------------------------------
-            // ORDER FORM INTERACTIONS & ITEM ROWS
-            // -------------------------------------------------------------
             setOrderPaymentMethod(method) {
                 this.selectedPaymentMethod = method;
                 const instaBtn = document.getElementById('pay-choice-instapay');
@@ -1205,12 +1147,8 @@
                 }
 
                 this.sessionData.participants = participants;
-                
-                // Broadcast individual order update to other peers via NTFY
-                await this.saveSessionData({
-                    type: 'NEW_ORDER',
-                    participant: savedParticipant
-                });
+                this.saveSessionToLocalArchive(true);
+                await this.saveSessionDataToFirestore();
 
                 this.resetOrderForm();
             }
@@ -1221,7 +1159,8 @@
                 if (p) {
                     p.isPaid = !p.isPaid;
                     this.sessionData.participants = participants;
-                    await this.saveSessionData();
+                    this.saveSessionToLocalArchive(true);
+                    await this.saveSessionDataToFirestore();
                 }
             }
 
@@ -1230,7 +1169,8 @@
                 const name = p ? p.name : 'this order';
                 this.showConfirmDialog(`Remove Order?`, `Are you sure you want to remove ${name}'s order from the session?`, async () => {
                     this.sessionData.participants = this.sessionData.participants.filter(item => item.id !== id);
-                    await this.saveSessionData();
+                    this.saveSessionToLocalArchive(true);
+                    await this.saveSessionDataToFirestore();
                     this.showToast('Order removed', 'info');
                     if (this.currentEditingParticipantId === id) {
                         this.resetOrderForm();
@@ -1238,9 +1178,6 @@
                 });
             }
 
-            // -------------------------------------------------------------
-            // ADMIN CONTROLS & SETTINGS
-            // -------------------------------------------------------------
             toggleAdminMode() {
                 const panel = document.getElementById('admin-panel');
                 panel.classList.toggle('hidden');
@@ -1271,19 +1208,18 @@
                 this.sessionData.deliveryFee = parseFloat(document.getElementById('admin-input-delivery').value) || 0;
                 this.sessionData.serviceFee = parseFloat(document.getElementById('admin-input-tax').value) || 0;
                 this.sessionData.splitMethod = document.getElementById('admin-select-split').value;
-                await this.saveSessionData();
+                this.saveSessionToLocalArchive(true);
+                await this.saveSessionDataToFirestore();
                 this.renderOrdersStream();
             }
 
             async toggleLockSession() {
                 this.sessionData.isLocked = !this.sessionData.isLocked;
-                await this.saveSessionData();
+                this.saveSessionToLocalArchive(true);
+                await this.saveSessionDataToFirestore();
                 this.showToast(this.sessionData.isLocked ? 'Orders locked' : 'Orders unlocked', 'info');
             }
 
-            // -------------------------------------------------------------
-            // PRESETS & HISTORY
-            // -------------------------------------------------------------
             showCreateSessionModal() {
                 document.getElementById('modal-create-session').classList.remove('hidden');
                 lucide.createIcons();
@@ -1318,7 +1254,8 @@
                 });
 
                 this.sessionData.presets = newPresets;
-                await this.saveSessionData();
+                this.saveSessionToLocalArchive(true);
+                await this.saveSessionDataToFirestore();
                 this.closeModal('modal-admin-menu');
                 this.showToast('Presets saved!', 'success');
             }
@@ -1326,7 +1263,8 @@
             async clearPresets() {
                 this.sessionData.presets = [];
                 document.getElementById('quick-preset-paste').value = '';
-                await this.saveSessionData();
+                this.saveSessionToLocalArchive(true);
+                await this.saveSessionDataToFirestore();
                 this.closeModal('modal-admin-menu');
             }
 
@@ -1389,7 +1327,7 @@
                     localStorage.setItem('food_sessions_archive', JSON.stringify(history));
                     localStorage.removeItem(`food_session_${code}`);
 
-                    this.showToast('Session deleted', 'info');
+                    this.showToast('Session deleted from history', 'info');
                     this.renderHistoryList();
                 });
             }
@@ -1416,9 +1354,6 @@
                 window.location.hash = `#session=${code}`;
             }
 
-            // -------------------------------------------------------------
-            // MODAL DIALOGS & UTILITIES
-            // -------------------------------------------------------------
             showConfirmDialog(title, message, onConfirm) {
                 const modal = document.getElementById('modal-custom-confirm');
                 document.getElementById('custom-confirm-title').innerText = title;
