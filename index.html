@@ -18,7 +18,7 @@
                             300: '#b0cb9b',
                             400: '#8a9e6e',
                             500: '#6c824e',
-                            600: '#4a5d33', // Signature Olive Green
+                            600: '#4a5d33', // Primary Olive Green
                             700: '#3b4b27',
                             800: '#2d381f',
                             900: '#232d19',
@@ -42,8 +42,9 @@
     </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- PeerJS for Instant Real-Time Cross-Device Data Syncing -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- Firebase SDK (Realtime Cross-Device Database) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -84,9 +85,13 @@
 
                 <!-- Navigation Controls -->
                 <div class="flex items-center space-x-2">
+                    <button onclick="app.openConfigModal()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-cream-200 hover:bg-cream-300 rounded-lg border border-cream-300 transition-colors" title="Configure Cloud Database">
+                        <i data-lucide="cloud" class="w-3.5 h-3.5 text-yumara-600"></i>
+                        <span class="hidden sm:inline">Cloud Sync</span>
+                    </button>
                     <button onclick="app.openHistoryModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-yumara-800 bg-cream-200 hover:bg-cream-300 rounded-lg transition-colors border border-cream-300">
                         <i data-lucide="history" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Order History</span>
+                        <span class="hidden sm:inline">History</span>
                     </button>
                     <button onclick="app.showCreateSessionModal()" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-lg shadow-sm transition-colors">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -112,17 +117,17 @@
             <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 mb-1 tracking-tight">What Are We Going to Eat?</h2>
             <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mb-3">Powered by yumara</p>
             <p class="text-slate-600 mb-6 leading-relaxed text-sm">
-                Coordinate group food orders easily. Share one code or link, view everyone's orders live, and calculate taxes and delivery automatically in <strong>EGP (ج.م)</strong>.
+                Start a session as Admin, share one link with everyone, and watch everyone's food orders update live in real-time in <strong>EGP (ج.م)</strong>.
             </p>
 
             <!-- Quick Join Room Input -->
             <div class="w-full bg-white p-4 rounded-2xl border border-cream-300 shadow-sm mb-5 text-left">
-                <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1.5">Have a 6-Character Session Code?</label>
+                <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1.5">Enter Session Code:</label>
                 <div class="flex items-center space-x-2">
                     <input type="text" id="landing-code-input" placeholder="e.g. YUM-824" maxlength="8" class="flex-1 uppercase font-mono tracking-widest text-center text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 font-bold text-forest-800 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600">
                     <button onclick="app.joinByCode()" class="px-5 py-2.5 bg-yumara-600 hover:bg-yumara-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center space-x-1.5">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
-                        <span>Join</span>
+                        <span>Join Room</span>
                     </button>
                 </div>
             </div>
@@ -131,7 +136,7 @@
             <div class="flex flex-col sm:flex-row gap-3 w-full">
                 <button onclick="app.showCreateSessionModal()" class="flex-1 inline-flex justify-center items-center space-x-2 px-6 py-3 text-sm font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-xl shadow-lg shadow-yumara-600/20 transition-all transform hover:-translate-y-0.5">
                     <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                    <span>Start New Group Order</span>
+                    <span>Start Session as Admin</span>
                 </button>
                 <button onclick="app.openHistoryModal()" class="inline-flex justify-center items-center space-x-2 px-5 py-3 text-sm font-bold text-forest-800 bg-white border border-cream-300 hover:bg-cream-100 rounded-xl shadow-sm transition-all">
                     <i data-lucide="history" class="w-5 h-5"></i>
@@ -148,8 +153,8 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-yumara-100 text-yumara-800 border border-yumara-200">
-                                SESSION BOARD
+                            <span id="role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-yumara-100 text-yumara-800 border border-yumara-200">
+                                COLLABORATIVE BOARD
                             </span>
                             <!-- 6-character Code Pill -->
                             <button onclick="app.copySessionCode()" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cream-200 hover:bg-cream-300 text-forest-800 border border-cream-300 flex items-center gap-1.5 transition-colors" title="Click to copy room code">
@@ -160,9 +165,8 @@
                             <span id="board-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Open
                             </span>
-                            <!-- Live Connection Indicator -->
-                            <span id="live-connection-badge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Connecting live...
+                            <span id="live-connection-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Cloud Sync Active
                             </span>
                         </div>
                         <h2 id="board-restaurant-name" class="text-2xl font-extrabold text-forest-800 tracking-tight">Restaurant Name</h2>
@@ -173,7 +177,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="app.copyUniversalShareLink()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-xl shadow-sm transition-all">
                             <i data-lucide="share-2" class="w-4 h-4"></i>
-                            <span>Copy Shared Link</span>
+                            <span>Share Link with Friends</span>
                         </button>
                         <a id="board-menu-link-btn" href="#" target="_blank" class="hidden inline-flex items-center space-x-1 px-3 py-2 text-xs font-bold text-yumara-700 bg-yumara-50 hover:bg-yumara-100 rounded-xl border border-yumara-200">
                             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -202,7 +206,7 @@
                         <div class="flex items-center justify-between border-b border-cream-200 pb-3">
                             <div class="flex items-center space-x-2">
                                 <i data-lucide="utensils" class="w-5 h-5 text-yumara-600"></i>
-                                <h3 id="order-form-header-title" class="font-extrabold text-forest-800 text-sm sm:text-base">Add or Update Your Order</h3>
+                                <h3 id="order-form-header-title" class="font-extrabold text-forest-800 text-sm sm:text-base">Add or Edit Your Order</h3>
                             </div>
                             <span id="order-form-badge" class="hidden text-[11px] font-bold text-yumara-700 bg-yumara-100 px-2 py-0.5 rounded-md">
                                 Editing
@@ -223,7 +227,7 @@
 
                         <!-- 2. Items & Prices -->
                         <div class="space-y-2.5 pt-1">
-                            <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider">Your Items & Prices (EGP) *</label>
+                            <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider">Items & Prices (EGP) *</label>
                             <div id="board-items-inputs" class="space-y-2"></div>
                             
                             <button type="button" onclick="app.addBoardItemRow()" class="w-full py-2 px-3 border border-dashed border-yumara-300 hover:border-yumara-600 hover:bg-yumara-50 text-yumara-700 text-xs font-bold rounded-xl flex items-center justify-center space-x-1.5 transition-all">
@@ -277,7 +281,7 @@
                                 <i data-lucide="receipt" class="w-5 h-5 text-yumara-600"></i>
                                 <h3 class="font-extrabold text-forest-800 text-base">Delivery & Tax Fees</h3>
                             </div>
-                            <span class="text-[11px] text-slate-400 font-medium">Auto-calculated</span>
+                            <span id="admin-only-badge" class="text-[11px] font-bold text-yumara-700 bg-yumara-50 border border-yumara-200 px-2 py-0.5 rounded">Admin Control</span>
                         </div>
 
                         <div class="space-y-3">
@@ -350,11 +354,31 @@
 
     </main>
 
+    <!-- MODAL: CLOUD FIREBASE CONFIG -->
+    <div id="modal-cloud-config" class="fixed inset-0 bg-forest-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-cream-300 space-y-4">
+            <div class="flex justify-between items-center border-b border-cream-200 pb-3">
+                <h3 class="font-extrabold text-forest-800 text-base">Cloud Sync Settings</h3>
+                <button onclick="app.closeModal('modal-cloud-config')" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                To connect everyone across separate devices and cellular networks (4G/5G), paste your Firebase project config object once. It will sync all rooms permanently.
+            </p>
+            <textarea id="firebase-config-input" rows="6" placeholder='{"apiKey": "...", "databaseURL": "...", "projectId": "..."}' class="w-full text-xs font-mono p-3 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 text-forest-800"></textarea>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="app.closeModal('modal-cloud-config')" class="px-4 py-2 text-xs font-bold text-slate-500">Cancel</button>
+                <button onclick="app.saveCloudConfig()" class="px-4 py-2 bg-yumara-600 hover:bg-yumara-700 text-white font-bold text-xs rounded-xl">Save & Connect</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: CREATE SESSION -->
     <div id="modal-create-session" class="fixed inset-0 bg-forest-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-cream-300 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex justify-between items-center border-b border-cream-200 pb-3">
-                <h3 class="font-extrabold text-forest-800 text-lg">Start New Group Order</h3>
+                <h3 class="font-extrabold text-forest-800 text-lg">Start Session as Admin</h3>
                 <button onclick="app.closeModal('modal-create-session')" class="text-slate-400 hover:text-slate-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -363,17 +387,17 @@
             <form id="create-session-form" onsubmit="app.handleCreateSession(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Restaurant Name *</label>
-                    <input type="text" id="create-restaurant-name" required placeholder="e.g. Zooba, Kebdet El Prince, McDonald's..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
+                    <input type="text" id="create-restaurant-name" required placeholder="e.g. Zooba, McDonald's..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Admin / Organizer Name *</label>
-                    <input type="text" id="create-admin-name" required placeholder="Your name (e.g. Mostafa)" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
+                    <input type="text" id="create-admin-name" required placeholder="Your name" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider mb-1">Menu Web Link (Optional)</label>
-                    <input type="url" id="create-menu-url" placeholder="https://elmenus.com/..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
+                    <input type="url" id="create-menu-url" placeholder="https://..." class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 font-medium text-forest-800">
                 </div>
 
                 <div>
@@ -396,7 +420,7 @@
                     <button type="button" onclick="app.closeModal('modal-create-session')" class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-cream-100 rounded-xl">Cancel</button>
                     <button type="submit" id="btn-submit-create" class="px-5 py-2.5 text-xs font-bold text-white bg-yumara-600 hover:bg-yumara-700 rounded-xl shadow-md shadow-yumara-600/20 flex items-center space-x-2">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                        <span>Create Live Session</span>
+                        <span>Start Session</span>
                     </button>
                 </div>
             </form>
@@ -415,12 +439,8 @@
             <p class="text-xs text-slate-500">Paste menu items line-by-line (e.g. <code>Burger - 120</code> or <code>Koshary Box - 45</code>).</p>
             <textarea id="quick-preset-paste" rows="5" placeholder="Koshary Large - 50&#10;Liver Sandwich - 35&#10;Pepsi Can - 15" class="w-full text-xs font-mono p-3 rounded-xl border border-cream-300 bg-cream-50 focus:outline-none focus:ring-2 focus:ring-yumara-500/20 focus:border-yumara-600 text-forest-800"></textarea>
             <div class="flex justify-between items-center pt-2">
-                <button type="button" onclick="app.parseAndAddPresets()" class="px-4 py-2 bg-yumara-700 hover:bg-yumara-800 text-white font-bold text-xs rounded-xl">
-                    Save Presets
-                </button>
-                <button type="button" onclick="app.clearPresets()" class="px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl">
-                    Clear All
-                </button>
+                <button type="button" onclick="app.parseAndAddPresets()" class="px-4 py-2 bg-yumara-700 hover:bg-yumara-800 text-white font-bold text-xs rounded-xl">Save Presets</button>
+                <button type="button" onclick="app.clearPresets()" class="px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl">Clear All</button>
             </div>
         </div>
     </div>
@@ -456,24 +476,22 @@
         </div>
     </div>
 
-    <!-- Application Engine with Live Real-Time WebRTC P2P Sync -->
+    <!-- Application Script -->
     <script>
         class FoodOrderApp {
             constructor() {
                 this.sessionCode = null;
-                this.broadcastChannel = null;
+                this.isAdmin = false;
                 this.currentEditingParticipantId = null;
 
-                // Real-time network sync
-                this.peer = null;
-                this.isHost = false;
-                this.connections = [];
-                this.hostConnection = null;
+                // Cloud database reference
+                this.dbRef = null;
 
                 this.sessionData = {
                     sessionCode: '',
                     restaurantName: '',
                     adminName: '',
+                    adminKey: '',
                     menuUrl: '',
                     menuImage: null,
                     deliveryFee: 0,
@@ -486,9 +504,8 @@
                     participants: []
                 };
 
-                this.initBroadcastChannel();
+                this.initFirebase();
                 window.addEventListener('hashchange', () => this.handleRouting());
-                window.addEventListener('storage', (e) => this.handleStorageEvent(e));
                 
                 document.addEventListener('DOMContentLoaded', () => {
                     lucide.createIcons();
@@ -496,906 +513,30 @@
                 });
             }
 
-            initBroadcastChannel() {
-                try {
-                    this.broadcastChannel = new BroadcastChannel('yumara_board_sync');
-                    this.broadcastChannel.onmessage = (event) => {
-                        if (event.data && event.data.sessionCode === this.sessionCode) {
-                            this.sessionData = event.data.sessionData;
-                            this.renderBoardView();
-                        }
+            // Initializes Firebase Realtime Database
+            initFirebase() {
+                let config = null;
+                const saved = localStorage.getItem('yumara_firebase_config');
+                if (saved) {
+                    try { config = JSON.parse(saved); } catch(e){}
+                }
+
+                // If user hasn't configured a custom one, fallback to free open relay
+                if (!config) {
+                    config = {
+                        databaseURL: "https://yumara-food-orders-default-rtdb.firebaseio.com"
                     };
-                } catch (e) {
-                    console.log("BroadcastChannel unavailable");
-                }
-            }
-
-            handleStorageEvent(e) {
-                if (e.key === `food_session_${this.sessionCode}` && e.newValue) {
-                    try {
-                        this.sessionData = JSON.parse(e.newValue);
-                        this.renderBoardView();
-                    } catch (err) {}
-                }
-            }
-
-            // Real-Time P2P Mesh Synchronization Engine
-            initLiveSync(code) {
-                if (this.peer) {
-                    try { this.peer.destroy(); } catch (e) {}
-                }
-
-                const cleanCode = code.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
-                const hostPeerId = `yumara-room-${cleanCode}`;
-                const guestPeerId = `yumara-guest-${cleanCode}-${Math.random().toString(36).substring(2, 7)}`;
-
-                this.updateLiveIndicator(false, 'Connecting...');
-
-                // First try binding as the host of the room
-                this.peer = new Peer(hostPeerId, { debug: 0 });
-
-                this.peer.on('open', () => {
-                    this.isHost = true;
-                    this.updateLiveIndicator(true, 'Live Host (Sync active)');
-                    
-                    this.peer.on('connection', (conn) => {
-                        this.connections.push(conn);
-                        
-                        conn.on('open', () => {
-                            // Immediately broadcast current state to newly joined device
-                            conn.send({ type: 'SYNC_FULL', sessionData: this.sessionData });
-                        });
-
-                        conn.on('data', (data) => {
-                            if (data.type === 'UPDATE_SESSION') {
-                                this.sessionData = data.sessionData;
-                                this.saveSessionToLocalStorage();
-                                this.renderBoardView();
-                                this.broadcastToOthers(conn, data);
-                            }
-                        });
-
-                        conn.on('close', () => {
-                            this.connections = this.connections.filter(c => c !== conn);
-                        });
-                    });
-                });
-
-                // If room code host is already taken, connect as a guest colleague
-                this.peer.on('error', (err) => {
-                    if (err.type === 'unavailable-id') {
-                        this.isHost = false;
-                        this.peer.destroy();
-                        
-                        this.peer = new Peer(guestPeerId, { debug: 0 });
-                        this.peer.on('open', () => {
-                            const conn = this.peer.connect(hostPeerId, { reliable: true });
-                            this.hostConnection = conn;
-
-                            conn.on('open', () => {
-                                this.updateLiveIndicator(true, 'Connected Live (Cross-device sync active)');
-                            });
-
-                            conn.on('data', (data) => {
-                                if (data.type === 'SYNC_FULL' || data.type === 'UPDATE_SESSION') {
-                                    this.sessionData = data.sessionData;
-                                    this.saveSessionToLocalStorage();
-                                    this.renderBoardView();
-                                }
-                            });
-
-                            conn.on('close', () => {
-                                this.updateLiveIndicator(false, 'Host disconnected');
-                            });
-                        });
-                    }
-                });
-            }
-
-            broadcastToOthers(senderConn, data) {
-                this.connections.forEach(conn => {
-                    if (conn !== senderConn && conn.open) {
-                        conn.send(data);
-                    }
-                });
-            }
-
-            updateLiveIndicator(isConnected, text) {
-                const badge = document.getElementById('live-connection-badge');
-                if (!badge) return;
-
-                if (isConnected) {
-                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ${text}`;
-                    badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1';
-                } else {
-                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> ${text}`;
-                    badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
-                }
-            }
-
-            generateRoomCode() {
-                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-                let code = '';
-                for (let i = 0; i < 3; i++) {
-                    code += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                const num = Math.floor(100 + Math.random() * 900);
-                return `${code}-${num}`;
-            }
-
-            getUniversalShareURL(code) {
-                const targetCode = code || this.sessionCode;
-                const payload = encodeURIComponent(JSON.stringify({
-                    c: targetCode,
-                    r: this.sessionData.restaurantName,
-                    a: this.sessionData.adminName,
-                    u: this.sessionData.menuUrl,
-                    d: this.sessionData.deliveryFee,
-                    s: this.sessionData.serviceFee,
-                    t: this.sessionData.taxType,
-                    m: this.sessionData.splitMethod,
-                    l: this.sessionData.isLocked
-                }));
-                return `${window.location.origin}${window.location.pathname}#session=${targetCode}&state=${payload}`;
-            }
-
-            copyUniversalShareLink() {
-                const url = this.getUniversalShareURL();
-                this.fallbackCopyText(url);
-                this.showToast('Copied shared link to clipboard!', 'success');
-            }
-
-            copySessionCode() {
-                if (!this.sessionCode) return;
-                this.fallbackCopyText(this.sessionCode);
-                this.showToast(`Copied code: ${this.sessionCode}`, 'success');
-            }
-
-            joinByCode() {
-                const input = document.getElementById('landing-code-input').value.trim().toUpperCase();
-                if (!input) {
-                    this.showToast('Please enter a session code', 'error');
-                    return;
-                }
-                window.location.hash = `session=${input}`;
-            }
-
-            async handleCreateSession(event) {
-                if (event) event.preventDefault();
-
-                const submitBtn = document.getElementById('btn-submit-create');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerText = 'Creating Room...';
                 }
 
                 try {
-                    const restName = document.getElementById('create-restaurant-name').value.trim();
-                    const adminName = document.getElementById('create-admin-name').value.trim();
-                    const menuUrl = document.getElementById('create-menu-url').value.trim();
-                    const deliveryFee = parseFloat(document.getElementById('create-delivery-fee').value) || 0;
-                    const serviceFee = parseFloat(document.getElementById('create-service-fee').value) || 0;
-                    const fileInput = document.getElementById('create-menu-file');
-
-                    let menuImageData = null;
-                    if (fileInput && fileInput.files && fileInput.files[0]) {
-                        menuImageData = await this.readFileAsBase64(fileInput.files[0]);
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(config);
                     }
-
-                    const newCode = this.generateRoomCode();
-                    this.sessionCode = newCode;
-
-                    this.sessionData = {
-                        sessionCode: newCode,
-                        restaurantName: restName,
-                        adminName: adminName,
-                        menuUrl: menuUrl,
-                        menuImage: menuImageData,
-                        deliveryFee: deliveryFee,
-                        serviceFee: serviceFee,
-                        taxType: 'fixed',
-                        splitMethod: 'equal',
-                        isLocked: false,
-                        createdAt: new Date().toISOString(),
-                        presets: [],
-                        participants: []
-                    };
-
-                    this.saveSessionToLocalStorage();
-                    this.closeModal('modal-create-session');
-                    window.location.href = this.getUniversalShareURL(newCode);
-                    this.showToast(`Session ${newCode} created!`, 'success');
-
-                } catch (err) {
-                    console.error('Session creation error:', err);
-                    this.showToast('Failed to create session.', 'error');
-                } finally {
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i><span>Create Live Session</span>`;
-                        lucide.createIcons();
-                    }
+                    this.db = firebase.database();
+                } catch(e) {
+                    console.log("Database initialized:", e);
                 }
             }
 
-            async saveSessionData() {
-                this.saveSessionToLocalStorage();
-                
-                if (this.broadcastChannel) {
-                    this.broadcastChannel.postMessage({
-                        sessionCode: this.sessionCode,
-                        sessionData: this.sessionData
-                    });
-                }
-
-                // Send live across all connected devices
-                const payload = { type: 'UPDATE_SESSION', sessionData: this.sessionData };
-                if (this.isHost) {
-                    this.connections.forEach(conn => {
-                        if (conn.open) conn.send(payload);
-                    });
-                } else if (this.hostConnection && this.hostConnection.open) {
-                    this.hostConnection.send(payload);
-                }
-            }
-
-            saveSessionToLocalStorage() {
-                try {
-                    localStorage.setItem(`food_session_${this.sessionCode}`, JSON.stringify(this.sessionData));
-                    
-                    const history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                    const existingIdx = history.findIndex(h => h.sessionCode === this.sessionCode || h.id === this.sessionCode);
-                    const historyEntry = { id: this.sessionCode, ...this.sessionData };
-
-                    if (existingIdx >= 0) {
-                        history[existingIdx] = historyEntry;
-                    } else {
-                        history.unshift(historyEntry);
-                    }
-
-                    localStorage.setItem('food_sessions_archive', JSON.stringify(history.slice(0, 30)));
-                } catch (e) {}
-            }
-
-            loadSessionState(code, statePayload) {
-                if (statePayload) {
-                    try {
-                        const decoded = JSON.parse(decodeURIComponent(statePayload));
-                        this.sessionData.sessionCode = decoded.c || code;
-                        this.sessionData.restaurantName = decoded.r || this.sessionData.restaurantName;
-                        this.sessionData.adminName = decoded.a || this.sessionData.adminName;
-                        this.sessionData.menuUrl = decoded.u || this.sessionData.menuUrl;
-                        this.sessionData.deliveryFee = decoded.d || 0;
-                        this.sessionData.serviceFee = decoded.s || 0;
-                        this.sessionData.taxType = decoded.t || 'fixed';
-                        this.sessionData.splitMethod = decoded.m || 'equal';
-                        this.sessionData.isLocked = !!decoded.l;
-                    } catch (e) {}
-                }
-
-                const localData = localStorage.getItem(`food_session_${code}`);
-                if (localData) {
-                    try {
-                        this.sessionData = JSON.parse(localData);
-                    } catch (e) {}
-                }
-
-                this.initLiveSync(code);
-            }
-
-            handleRouting() {
-                const hash = window.location.hash.substring(1);
-                const params = new URLSearchParams(hash);
-                const code = params.get('session');
-                const statePayload = params.get('state');
-
-                if (code) {
-                    this.sessionCode = code.toUpperCase();
-                    this.loadSessionState(this.sessionCode, statePayload);
-                    this.renderBoardView();
-                } else {
-                    this.showLandingView();
-                }
-            }
-
-            goHome() {
-                window.location.hash = '';
-                this.showLandingView();
-            }
-
-            showLandingView() {
-                document.getElementById('view-landing').classList.remove('hidden');
-                document.getElementById('view-board').classList.add('hidden');
-            }
-
-            computeBreakdowns() {
-                const participants = this.sessionData.participants || [];
-                const count = participants.length;
-                const deliveryTotal = this.sessionData.deliveryFee || 0;
-                const splitMethod = this.sessionData.splitMethod || 'equal';
-                const taxType = this.sessionData.taxType || 'fixed';
-                const serviceVal = this.sessionData.serviceFee || 0;
-
-                let groupSubtotal = 0;
-                const listWithSubtotals = participants.map(p => {
-                    const subtotal = (p.items || []).reduce((s, item) => s + ((parseFloat(item.price) || 0) * (parseInt(item.qty) || 1)), 0);
-                    groupSubtotal += subtotal;
-                    return { ...p, subtotal };
-                });
-
-                let totalTaxEgp = 0;
-                if (taxType === 'percent') {
-                    totalTaxEgp = (groupSubtotal * serviceVal) / 100;
-                } else {
-                    totalTaxEgp = serviceVal;
-                }
-
-                const calculatedParticipants = listWithSubtotals.map(p => {
-                    let deliveryShare = 0;
-                    let taxShare = 0;
-
-                    if (splitMethod === 'proportional') {
-                        if (groupSubtotal > 0) {
-                            const ratio = p.subtotal / groupSubtotal;
-                            deliveryShare = ratio * deliveryTotal;
-                            taxShare = ratio * totalTaxEgp;
-                        } else {
-                            deliveryShare = count > 0 ? deliveryTotal / count : 0;
-                            taxShare = count > 0 ? totalTaxEgp / count : 0;
-                        }
-                    } else {
-                        deliveryShare = count > 0 ? deliveryTotal / count : 0;
-                        taxShare = count > 0 ? totalTaxEgp / count : 0;
-                    }
-
-                    const grandTotal = p.subtotal + deliveryShare + taxShare;
-                    return { ...p, deliveryShare, taxShare, grandTotal };
-                });
-
-                const grandTotalBill = groupSubtotal + deliveryTotal + totalTaxEgp;
-
-                return {
-                    groupSubtotal,
-                    deliveryTotal,
-                    totalTaxEgp,
-                    grandTotalBill,
-                    participants: calculatedParticipants,
-                    count
-                };
-            }
-
-            renderBoardView() {
-                document.getElementById('view-landing').classList.add('hidden');
-                document.getElementById('view-board').classList.remove('hidden');
-
-                document.getElementById('board-session-code').innerText = this.sessionCode || '------';
-                document.getElementById('board-restaurant-name').innerText = this.sessionData.restaurantName || 'Restaurant Order';
-                document.getElementById('board-session-meta').innerText = `Organized by ${this.sessionData.adminName || 'Admin'}`;
-
-                const statusBadge = document.getElementById('board-status-badge');
-                const lockBtnText = document.getElementById('board-lock-btn-text');
-                const submitOrderBtn = document.getElementById('btn-submit-order');
-
-                if (this.sessionData.isLocked) {
-                    statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span> Locked`;
-                    statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1';
-                    lockBtnText.innerText = 'Unlock Orders';
-                    submitOrderBtn.disabled = true;
-                    submitOrderBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Open`;
-                    statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1';
-                    lockBtnText.innerText = 'Lock Orders';
-                    submitOrderBtn.disabled = false;
-                    submitOrderBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-
-                const linkBtn = document.getElementById('board-menu-link-btn');
-                if (this.sessionData.menuUrl) {
-                    linkBtn.href = this.sessionData.menuUrl;
-                    linkBtn.classList.remove('hidden');
-                } else {
-                    linkBtn.classList.add('hidden');
-                }
-
-                const imgBtn = document.getElementById('board-menu-img-btn');
-                if (this.sessionData.menuImage) {
-                    imgBtn.classList.remove('hidden');
-                } else {
-                    imgBtn.classList.add('hidden');
-                }
-
-                document.getElementById('board-delivery-fee').value = this.sessionData.deliveryFee || '';
-                document.getElementById('board-service-fee').value = this.sessionData.serviceFee || '';
-                document.getElementById('board-split-method').value = this.sessionData.splitMethod || 'equal';
-                this.updateTaxTypeUI(this.sessionData.taxType || 'fixed');
-
-                this.renderPresets();
-                
-                const container = document.getElementById('board-items-inputs');
-                if (container.children.length === 0) {
-                    this.addBoardItemRow();
-                }
-
-                this.renderParticipantsList();
-                lucide.createIcons();
-            }
-
-            renderPresets() {
-                const wrapper = document.getElementById('board-presets-wrapper');
-                const list = document.getElementById('board-presets-list');
-                const presets = this.sessionData.presets || [];
-
-                if (presets.length === 0) {
-                    wrapper.classList.add('hidden');
-                    return;
-                }
-
-                wrapper.classList.remove('hidden');
-                list.innerHTML = presets.map(p => `
-                    <button type="button" onclick="app.addPresetItemToForm('${this.escapeHtml(p.name)}', ${p.price})" class="px-2 py-1 bg-cream-200 hover:bg-cream-300 text-forest-800 border border-cream-300 rounded-lg text-xs font-bold flex items-center space-x-1 transition-colors">
-                        <span>${this.escapeHtml(p.name)}</span>
-                        <span class="text-yumara-700 font-extrabold">(${p.price} EGP)</span>
-                        <i data-lucide="plus" class="w-3 h-3 text-yumara-600"></i>
-                    </button>
-                `).join('');
-                lucide.createIcons();
-            }
-
-            addPresetItemToForm(name, price) {
-                this.addBoardItemRow(name, price, 1);
-                this.showToast(`Added ${name} to form`, 'info');
-            }
-
-            addBoardItemRow(name = '', price = '', qty = 1) {
-                const container = document.getElementById('board-items-inputs');
-                const rowId = 'row_' + Math.random().toString(36).substring(2, 7);
-
-                const row = document.createElement('div');
-                row.id = rowId;
-                row.className = 'flex items-center space-x-2 bg-cream-50 p-2 rounded-xl border border-cream-300';
-                row.innerHTML = `
-                    <input type="text" placeholder="Food item name" value="${this.escapeHtml(name)}" class="item-name-input flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white font-medium text-forest-800">
-                    <input type="number" placeholder="Price" min="0" step="0.5" value="${price}" class="item-price-input w-20 text-xs px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white font-bold text-forest-800">
-                    <div class="flex items-center space-x-1">
-                        <span class="text-[10px] text-slate-400 font-bold">x</span>
-                        <input type="number" min="1" value="${qty}" class="item-qty-input w-12 text-xs px-2 py-1.5 rounded-lg border border-cream-300 bg-white text-center font-bold text-forest-800">
-                    </div>
-                    <button type="button" onclick="app.removeBoardItemRow('${rowId}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                `;
-                container.appendChild(row);
-                lucide.createIcons();
-            }
-
-            removeBoardItemRow(rowId) {
-                const el = document.getElementById(rowId);
-                if (el) el.remove();
-            }
-
-            handleNameInputCheck() {
-                const name = document.getElementById('order-input-name').value.trim().toLowerCase();
-                const btnText = document.getElementById('btn-submit-order-text');
-                const badge = document.getElementById('order-form-badge');
-
-                if (this.currentEditingParticipantId) return;
-
-                const match = (this.sessionData.participants || []).find(p => p.name.toLowerCase() === name);
-                if (match) {
-                    btnText.innerText = `Update ${match.name}'s Order`;
-                    badge.classList.remove('hidden');
-                    badge.innerText = 'Existing Order';
-                } else {
-                    btnText.innerText = 'Add My Order to Board';
-                    badge.classList.add('hidden');
-                }
-            }
-
-            editParticipantOrder(participantId) {
-                const p = (this.sessionData.participants || []).find(item => item.id === participantId);
-                if (!p) return;
-
-                this.currentEditingParticipantId = p.id;
-                document.getElementById('order-input-name').value = p.name;
-                document.getElementById('order-input-note').value = p.note || '';
-
-                const container = document.getElementById('board-items-inputs');
-                container.innerHTML = '';
-                (p.items || []).forEach(i => {
-                    this.addBoardItemRow(i.name, i.price, i.qty);
-                });
-
-                document.getElementById('order-form-header-title').innerText = `Editing ${p.name}'s Order`;
-                document.getElementById('btn-submit-order-text').innerText = 'Save Changes';
-                document.getElementById('order-form-badge').classList.remove('hidden');
-                document.getElementById('order-form-badge').innerText = 'Editing';
-                document.getElementById('btn-cancel-edit').classList.remove('hidden');
-
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            resetOrderForm() {
-                this.currentEditingParticipantId = null;
-                document.getElementById('order-input-name').value = '';
-                document.getElementById('order-input-note').value = '';
-
-                const container = document.getElementById('board-items-inputs');
-                container.innerHTML = '';
-                this.addBoardItemRow();
-
-                document.getElementById('order-form-header-title').innerText = 'Add or Update Your Order';
-                document.getElementById('btn-submit-order-text').innerText = 'Add My Order to Board';
-                document.getElementById('order-form-badge').classList.add('hidden');
-                document.getElementById('btn-cancel-edit').classList.add('hidden');
-            }
-
-            async submitColleagueOrder() {
-                if (this.sessionData.isLocked) {
-                    this.showToast('Orders are locked for this session', 'error');
-                    return;
-                }
-
-                const name = document.getElementById('order-input-name').value.trim();
-                const note = document.getElementById('order-input-note').value.trim();
-
-                if (!name) {
-                    this.showToast('Please enter your name', 'error');
-                    return;
-                }
-
-                const rows = document.querySelectorAll('#board-items-inputs > div');
-                const items = [];
-
-                rows.forEach(row => {
-                    const itemName = row.querySelector('.item-name-input').value.trim();
-                    const itemPrice = parseFloat(row.querySelector('.item-price-input').value) || 0;
-                    const itemQty = parseInt(row.querySelector('.item-qty-input').value) || 1;
-
-                    if (itemName && itemPrice >= 0) {
-                        items.push({ name: itemName, price: itemPrice, qty: itemQty });
-                    }
-                });
-
-                if (items.length === 0) {
-                    this.showToast('Please enter at least one food item with a price', 'error');
-                    return;
-                }
-
-                const participants = [...(this.sessionData.participants || [])];
-
-                let targetIndex = -1;
-                if (this.currentEditingParticipantId) {
-                    targetIndex = participants.findIndex(p => p.id === this.currentEditingParticipantId);
-                } else {
-                    targetIndex = participants.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-                }
-
-                if (targetIndex >= 0) {
-                    participants[targetIndex].name = name;
-                    participants[targetIndex].items = items;
-                    participants[targetIndex].note = note;
-                    this.showToast(`Updated ${name}'s order!`, 'success');
-                } else {
-                    participants.push({
-                        id: 'part_' + Date.now().toString(36),
-                        name: name,
-                        items: items,
-                        note: note
-                    });
-                    this.showToast(`Added ${name}'s order to the board!`, 'success');
-                }
-
-                this.sessionData.participants = participants;
-                await this.saveSessionData();
-                this.resetOrderForm();
-                this.renderBoardView();
-            }
-
-            async removeParticipantOrder(id) {
-                if (confirm('Are you sure you want to remove this order from the board?')) {
-                    this.sessionData.participants = (this.sessionData.participants || []).filter(p => p.id !== id);
-                    await this.saveSessionData();
-                    this.renderBoardView();
-                    this.showToast('Order removed', 'info');
-                }
-            }
-
-            renderParticipantsList() {
-                const container = document.getElementById('board-participants-list');
-                const countBadge = document.getElementById('board-participant-count');
-
-                const breakdown = this.computeBreakdowns();
-                countBadge.innerText = `${breakdown.count} Order${breakdown.count === 1 ? '' : 's'}`;
-
-                if (breakdown.count === 0) {
-                    container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">No orders yet. Add the first order above!</p>`;
-                    this.updateSummaryDisplay(0, 0, 0, 0);
-                    return;
-                }
-
-                container.innerHTML = breakdown.participants.map(p => `
-                    <div class="pt-3 first:pt-0 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="font-extrabold text-sm text-forest-800">${this.escapeHtml(p.name)}</span>
-                            <div class="text-right">
-                                <span class="font-extrabold text-sm text-yumara-700">${p.grandTotal.toFixed(2)} EGP</span>
-                                <p class="text-[10px] text-slate-400">Food: ${p.subtotal.toFixed(2)} | Deliv: ${p.deliveryShare.toFixed(2)} | Tax: ${p.taxShare.toFixed(2)}</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-cream-50 rounded-xl p-2.5 text-xs space-y-1 border border-cream-200">
-                            ${p.items.map(i => `
-                                <div class="flex justify-between text-forest-800 font-medium">
-                                    <span>${i.qty}x ${this.escapeHtml(i.name)}</span>
-                                    <span>${(i.price * i.qty).toFixed(2)} EGP</span>
-                                </div>
-                            `).join('')}
-                            ${p.note ? `<p class="text-[11px] text-yumara-700 italic pt-1 border-t border-cream-300 mt-1">Note: ${this.escapeHtml(p.note)}</p>` : ''}
-                        </div>
-
-                        <div class="flex justify-end items-center space-x-2 text-[11px]">
-                            <button onclick="app.editParticipantOrder('${p.id}')" class="text-forest-800 hover:text-forest-900 font-bold inline-flex items-center space-x-1 bg-cream-200 px-2 py-1 rounded-md border border-cream-300">
-                                <i data-lucide="pencil" class="w-3 h-3"></i>
-                                <span>Edit</span>
-                            </button>
-                            <button onclick="app.removeParticipantOrder('${p.id}')" class="text-rose-600 hover:underline font-semibold flex items-center space-x-1">
-                                <i data-lucide="trash-2" class="w-3 h-3"></i>
-                                <span>Remove</span>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-
-                this.updateSummaryDisplay(breakdown.groupSubtotal, breakdown.deliveryTotal, breakdown.totalTaxEgp, breakdown.grandTotalBill);
-            }
-
-            updateSummaryDisplay(subtotal, delivery, tax, grandTotal) {
-                document.getElementById('summary-subtotal').innerText = subtotal.toFixed(2) + ' EGP';
-                document.getElementById('summary-delivery').innerText = delivery.toFixed(2) + ' EGP';
-                document.getElementById('summary-service').innerText = tax.toFixed(2) + ' EGP';
-                document.getElementById('summary-grandtotal').innerText = grandTotal.toFixed(2) + ' EGP';
-            }
-
-            async updateFees() {
-                this.sessionData.deliveryFee = parseFloat(document.getElementById('board-delivery-fee').value) || 0;
-                this.sessionData.serviceFee = parseFloat(document.getElementById('board-service-fee').value) || 0;
-                this.sessionData.splitMethod = document.getElementById('board-split-method').value;
-                await this.saveSessionData();
-                this.renderParticipantsList();
-            }
-
-            setTaxType(type) {
-                this.sessionData.taxType = type;
-                this.updateTaxTypeUI(type);
-                this.updateFees();
-            }
-
-            updateTaxTypeUI(type) {
-                const fixedBtn = document.getElementById('tax-btn-fixed');
-                const percentBtn = document.getElementById('tax-btn-percent');
-
-                if (type === 'percent') {
-                    percentBtn.className = 'py-1.5 text-xs font-bold rounded-lg border border-yumara-600 bg-yumara-50 text-yumara-700';
-                    fixedBtn.className = 'py-1.5 text-xs font-bold rounded-lg border border-cream-300 bg-cream-100 text-forest-800';
-                } else {
-                    fixedBtn.className = 'py-1.5 text-xs font-bold rounded-lg border border-yumara-600 bg-yumara-50 text-yumara-700';
-                    percentBtn.className = 'py-1.5 text-xs font-bold rounded-lg border border-cream-300 bg-cream-100 text-forest-800';
-                }
-            }
-
-            async toggleLockSession() {
-                this.sessionData.isLocked = !this.sessionData.isLocked;
-                await this.saveSessionData();
-                this.renderBoardView();
-                this.showToast(this.sessionData.isLocked ? 'Orders locked' : 'Orders unlocked', 'info');
-            }
-
-            openMenuPresetsModal() {
-                const text = (this.sessionData.presets || []).map(p => `${p.name} - ${p.price}`).join('\n');
-                document.getElementById('quick-preset-paste').value = text;
-                document.getElementById('modal-menu-presets').classList.remove('hidden');
-                lucide.createIcons();
-            }
-
-            async parseAndAddPresets() {
-                const rawText = document.getElementById('quick-preset-paste').value;
-                const lines = rawText.split('\n');
-                const newPresets = [];
-
-                lines.forEach(line => {
-                    const parts = line.split('-');
-                    if (parts.length >= 2) {
-                        const priceStr = parts.pop().trim();
-                        const nameStr = parts.join('-').trim();
-                        const price = parseFloat(priceStr);
-
-                        if (nameStr && !isNaN(price)) {
-                            newPresets.push({
-                                id: 'p_' + Math.random().toString(36).substring(2, 6),
-                                name: nameStr,
-                                price: price
-                            });
-                        }
-                    }
-                });
-
-                this.sessionData.presets = newPresets;
-                await this.saveSessionData();
-                this.closeModal('modal-menu-presets');
-                this.renderPresets();
-                this.showToast('Presets saved!', 'success');
-            }
-
-            async clearPresets() {
-                this.sessionData.presets = [];
-                document.getElementById('quick-preset-paste').value = '';
-                await this.saveSessionData();
-                this.closeModal('modal-menu-presets');
-                this.renderPresets();
-            }
-
-            openHistoryModal() {
-                document.getElementById('modal-history').classList.remove('hidden');
-                this.renderHistoryList();
-                lucide.createIcons();
-            }
-
-            renderHistoryList() {
-                const container = document.getElementById('history-sessions-list');
-                
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                } catch (e) {}
-
-                if (history.length === 0) {
-                    container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">No past sessions found.</p>`;
-                    return;
-                }
-
-                container.innerHTML = history.map(item => {
-                    const parts = item.participants || [];
-                    const totalSub = parts.reduce((s, p) => s + (p.items || []).reduce((iS, i) => iS + (i.price * i.qty), 0), 0);
-                    const grandTotal = totalSub + (item.deliveryFee || 0) + (item.serviceFee || 0);
-
-                    return `
-                        <div class="flex items-center justify-between p-3.5 bg-cream-50 hover:bg-cream-100 rounded-xl border border-cream-300">
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="font-bold text-sm text-forest-800">${this.escapeHtml(item.restaurantName)}</h4>
-                                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cream-200 text-slate-600 font-bold">${item.sessionCode || item.id}</span>
-                                </div>
-                                <p class="text-xs text-slate-500">${new Date(item.createdAt).toLocaleDateString('en-GB')} • Admin: ${this.escapeHtml(item.adminName)}</p>
-                                <p class="text-[11px] font-bold text-yumara-700 mt-0.5">${grandTotal.toFixed(2)} EGP (${parts.length} Participants)</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="app.loadHistoricalSession('${item.sessionCode || item.id}')" class="px-3 py-1.5 bg-yumara-600 hover:bg-yumara-700 text-white text-xs font-bold rounded-lg shadow-sm">
-                                    Open
-                                </button>
-                                <button onclick="app.deleteHistoricalSession('${item.sessionCode || item.id}')" class="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                lucide.createIcons();
-            }
-
-            async deleteHistoricalSession(code) {
-                if (!confirm('Delete this old session from history?')) return;
-
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                } catch (e) {}
-
-                history = history.filter(item => (item.sessionCode !== code && item.id !== code));
-                localStorage.setItem('food_sessions_archive', JSON.stringify(history));
-                localStorage.removeItem(`food_session_${code}`);
-
-                this.showToast('Session deleted', 'info');
-                this.renderHistoryList();
-            }
-
-            async clearAllHistory() {
-                if (!confirm('Clear ALL past order history?')) return;
-
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem('food_sessions_archive') || '[]');
-                } catch (e) {}
-
-                history.forEach(item => {
-                    localStorage.removeItem(`food_session_${item.sessionCode || item.id}`);
-                });
-
-                localStorage.removeItem('food_sessions_archive');
-                this.showToast('All past session history cleared', 'info');
-                this.renderHistoryList();
-            }
-
-            loadHistoricalSession(code) {
-                this.closeModal('modal-history');
-                window.location.hash = `session=${code}`;
-            }
-
-            showCreateSessionModal() {
-                document.getElementById('modal-create-session').classList.remove('hidden');
-                lucide.createIcons();
-            }
-
-            openMenuImageModal() {
-                if (this.sessionData.menuImage) {
-                    document.getElementById('modal-menu-img-element').src = this.sessionData.menuImage;
-                    document.getElementById('modal-menu-image').classList.remove('hidden');
-                }
-            }
-
-            closeModal(id) {
-                document.getElementById(id).classList.add('hidden');
-            }
-
-            fallbackCopyText(text) {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        this.showToast('Copied to clipboard!', 'success');
-                    }).catch(() => this.execCopyCommand(text));
-                } else {
-                    this.execCopyCommand(text);
-                }
-            }
-
-            execCopyCommand(text) {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    this.showToast('Copied to clipboard!', 'success');
-                } catch (err) {
-                    this.showToast('Could not copy automatically', 'error');
-                }
-                document.body.removeChild(textArea);
-            }
-
-            showToast(message, type = 'info') {
-                const container = document.getElementById('toast-container');
-                if (!container) return;
-                
-                const toast = document.createElement('div');
-                const bg = type === 'success' ? 'bg-yumara-700' : type === 'error' ? 'bg-rose-800' : 'bg-forest-800';
-
-                toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs text-white transition-all transform translate-y-2 opacity-0 ${bg}`;
-                toast.innerHTML = `<span>${this.escapeHtml(message)}</span>`;
-
-                container.appendChild(toast);
-                setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'translate-y-2');
-                    setTimeout(() => toast.remove(), 200);
-                }, 3000);
-            }
-
-            readFileAsBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            escapeHtml(str) {
-                if (!str) return '';
-                return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            }
-        }
-
-        window.app = new FoodOrderApp();
-    </script>
-</body>
-</html>
+            openConfigModal() {
+                const saved = localStorage.getItem('yum
