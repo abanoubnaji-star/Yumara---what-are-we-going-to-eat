@@ -71,18 +71,13 @@
                 <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="app.goHome()">
                     <div class="flex items-center gap-2 text-yumara-600">
                         <svg class="h-8 w-auto fill-current" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Cloche Dome -->
                             <path d="M 15 52 A 28 28 0 0 1 71 52 Z M 10 55 L 76 55 A 3 3 0 0 1 76 61 L 10 61 A 3 3 0 0 1 10 55 Z" />
-                            <!-- Fork -->
                             <path d="M 83 23 L 83 40 C 83 46 99 46 99 40 L 99 23 L 95 23 L 95 36 L 93 36 L 93 23 L 89 23 L 89 36 L 87 36 L 87 23 Z M 89 44 L 93 44 L 93 68 L 89 68 Z" />
-                            <!-- Knife -->
                             <path d="M 103 23 C 111 23 112 38 111 46 L 103 46 Z M 105 48 L 109 48 L 109 68 L 105 68 Z" />
-                            <!-- Seasoning Dots -->
                             <circle cx="73" cy="69" r="3" />
                             <circle cx="82" cy="74" r="2.5" />
                             <circle cx="94" cy="71" r="2" />
                             <circle cx="98" cy="76" r="2.5" />
-                            <!-- 'yumara' Text -->
                             <text x="120" y="65" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="46" letter-spacing="-1">yumara</text>
                         </svg>
                     </div>
@@ -90,9 +85,9 @@
 
                 <!-- Navigation Controls -->
                 <div class="flex items-center space-x-2">
-                    <div id="sync-status-indicator" class="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-cream-200 text-forest-800 border border-cream-300">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span id="sync-status-text">Cloud Sync Live</span>
+                    <div id="sync-status-indicator" class="inline-flex items-center space-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-cream-200 text-forest-800 border border-cream-300">
+                        <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="sync-status-text">Live Sync SSE</span>
                     </div>
 
                     <button onclick="app.openHistoryModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-yumara-800 bg-cream-200 hover:bg-cream-300 rounded-lg transition-colors border border-cream-300">
@@ -125,7 +120,7 @@
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 tracking-tight">What Are We Going to Eat?</h2>
                 <p class="text-yumara-600 text-xs font-bold uppercase tracking-widest mt-1">Live Multi-User Food Ordering • Powered by yumara</p>
                 <p class="text-slate-600 mt-3 text-sm leading-relaxed max-w-md mx-auto">
-                    Real-time cloud sync across everyone’s phones & laptops. Add orders, split delivery & taxes in <strong>EGP (ج.م)</strong>, and track payments seamlessly.
+                    Real-time cloud sync across everyone’s phones &amp; laptops. Add orders, split delivery &amp; taxes in <strong>EGP (ج.م)</strong>, and track payments seamlessly.
                 </p>
             </div>
 
@@ -175,7 +170,7 @@
                             </div>
 
                             <span id="session-lock-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live & Open
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live &amp; Open
                             </span>
 
                             <button id="admin-mode-toggle-btn" onclick="app.toggleAdminMode()" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-cream-200 hover:bg-cream-300 text-forest-800 border border-cream-300 flex items-center gap-1 transition-colors">
@@ -254,7 +249,7 @@
 
                         <!-- 2. Items List -->
                         <div class="space-y-2 pt-2 border-t border-cream-200">
-                            <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider">Food Items & Prices (EGP)</label>
+                            <label class="block text-xs font-bold text-forest-800 uppercase tracking-wider">Food Items &amp; Prices (EGP)</label>
                             <div id="board-items-inputs" class="space-y-2"></div>
 
                             <button type="button" onclick="app.addBoardItemRow()" class="w-full py-2 px-3 border border-dashed border-yumara-300 hover:border-yumara-600 hover:bg-yumara-50 text-yumara-700 text-xs font-bold rounded-xl flex items-center justify-center space-x-1.5 transition-all">
@@ -328,7 +323,7 @@
                         </div>
 
                         <div class="text-[11px] text-yumara-200 bg-forest-900/60 p-2.5 rounded-xl border border-forest-900">
-                            <p id="summary-split-explanation">Delivery & taxes are split equally among all members.</p>
+                            <p id="summary-split-explanation">Delivery &amp; taxes are split equally among all members.</p>
                         </div>
                     </div>
 
@@ -337,7 +332,7 @@
                         <div class="flex items-center justify-between border-b border-cream-200 pb-3">
                             <div class="flex items-center space-x-2">
                                 <i data-lucide="sliders" class="w-4 h-4 text-yumara-600"></i>
-                                <h3 class="font-bold text-forest-800 text-sm">Admin & Splitting Settings</h3>
+                                <h3 class="font-bold text-forest-800 text-sm">Admin &amp; Splitting Settings</h3>
                             </div>
                             <button id="admin-lock-btn" onclick="app.toggleLockSession()" class="inline-flex items-center space-x-1.5 px-2.5 py-1 text-xs font-bold text-forest-800 bg-cream-200 hover:bg-cream-300 rounded-lg border border-cream-300">
                                 <i data-lucide="lock" class="w-3.5 h-3.5"></i>
@@ -486,7 +481,7 @@
         </div>
     </div>
 
-    <!-- MODAL: CUSTOM CONFIRMATION MODAL (Replaces window.confirm) -->
+    <!-- MODAL: CUSTOM CONFIRMATION MODAL -->
     <div id="modal-custom-confirm" class="fixed inset-0 bg-forest-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-cream-300 space-y-4">
             <div class="flex items-center space-x-3 text-forest-800">
@@ -501,61 +496,13 @@
         </div>
     </div>
 
-    <!-- Firebase Async Import Module with Robust Realtime Support -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        let db = null;
-        let auth = null;
-        let user = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'food-order-app';
-
-        async function initCloudFirebase() {
-            try {
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const fbApp = initializeApp(firebaseConfig);
-                    db = getFirestore(fbApp);
-                    auth = getAuth(fbApp);
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        try {
-                            const cred = await signInWithCustomToken(auth, __initial_auth_token);
-                            user = cred.user;
-                        } catch (err) {
-                            const cred = await signInAnonymously(auth);
-                            user = cred.user;
-                        }
-                    } else {
-                        const cred = await signInAnonymously(auth);
-                        user = cred.user;
-                    }
-                    console.log("[Firebase] Authenticated successfully, ready for live sync.");
-                }
-            } catch (e) {
-                console.warn("[Firebase] Operating in Local & Broadcast mode:", e);
-            }
-
-            window.firebaseStore = { db, auth, user, appId, doc, setDoc, getDoc, deleteDoc, onSnapshot };
-            
-            // Notify FoodOrderApp that Firebase is authenticated
-            if (window.app && typeof window.app.onCloudReady === 'function') {
-                window.app.onCloudReady();
-            }
-        }
-
-        initCloudFirebase();
-    </script>
-
-    <!-- Unified Application Logic -->
+    <!-- Application Logic with NTFY SSE Live Sync -->
     <script>
         class FoodOrderApp {
             constructor() {
                 this.sessionCode = null; // 6-character clean code (e.g. YUM482)
                 this.broadcastChannel = null;
-                this.fbUnsubscribe = null;
+                this.eventSource = null;
                 this.selectedPaymentMethod = 'InstaPay';
                 this.currentEditingParticipantId = null;
 
@@ -567,8 +514,8 @@
                     menuImage: null,
                     deliveryFee: 0,
                     serviceFee: 0,
-                    taxType: 'fixed', // 'fixed' or 'percent'
-                    splitMethod: 'equal', // 'equal' or 'proportional'
+                    taxType: 'fixed',
+                    splitMethod: 'equal',
                     isLocked: false,
                     createdAt: null,
                     presets: [],
@@ -583,15 +530,6 @@
                     lucide.createIcons();
                     this.handleRouting();
                 });
-            }
-
-            onCloudReady() {
-                const indicator = document.getElementById('sync-status-indicator');
-                if (indicator) indicator.classList.remove('hidden');
-                // Re-bind listener for the active session once authenticated
-                if (this.sessionCode) {
-                    this.listenToSessionCloud(this.sessionCode);
-                }
             }
 
             initBroadcastChannel() {
@@ -615,7 +553,96 @@
                 }
             }
 
-            // Generate clean 6-character uppercase alphanumeric code (e.g. YUM482)
+            // -------------------------------------------------------------
+            // SSE & NTFY REALTIME SYNC INTEGRATION
+            // -------------------------------------------------------------
+            getNtfyTopic() {
+                return `yumara-order-room-${(this.sessionCode || 'default').toLowerCase()}`;
+            }
+
+            initEventSource(code) {
+                if (this.eventSource) {
+                    this.eventSource.close();
+                    this.eventSource = null;
+                }
+
+                const topic = `yumara-order-room-${code.toLowerCase()}`;
+                const syncStatusText = document.getElementById('sync-status-text');
+                const syncDot = document.getElementById('sync-dot');
+
+                try {
+                    this.eventSource = new EventSource(`https://ntfy.sh/${topic}/sse?since=12h`);
+
+                    this.eventSource.onopen = () => {
+                        if (syncStatusText) syncStatusText.innerText = 'Connected: SSE Live';
+                        if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                    };
+
+                    this.eventSource.onerror = () => {
+                        if (syncStatusText) syncStatusText.innerText = 'Sync Reconnecting...';
+                        if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+                    };
+
+                    this.eventSource.onmessage = (event) => {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (data.event === "message" && data.message) {
+                                const payload = JSON.parse(data.message);
+                                this.handleIncomingRemoteMessage(payload);
+                            }
+                        } catch (err) {
+                            // Non-JSON ping or malformed event
+                        }
+                    };
+                } catch (e) {
+                    console.warn("EventSource setup error:", e);
+                }
+            }
+
+            handleIncomingRemoteMessage(payload) {
+                if (!payload || !payload.type) return;
+
+                if (payload.type === 'NEW_ORDER') {
+                    const incomingParticipant = payload.participant;
+                    if (!incomingParticipant) return;
+
+                    const participants = [...(this.sessionData.participants || [])];
+                    const existingIndex = participants.findIndex(p => p.id === incomingParticipant.id || p.name.toLowerCase() === incomingParticipant.name.toLowerCase());
+
+                    if (existingIndex >= 0) {
+                        participants[existingIndex] = incomingParticipant;
+                    } else {
+                        participants.push(incomingParticipant);
+                    }
+
+                    this.sessionData.participants = participants;
+                    this.saveSessionToLocalArchive();
+                    this.renderSessionBoard();
+                    this.showToast(`New update: ${incomingParticipant.name}'s order arrived!`, 'info');
+                } else if (payload.type === 'SESSION_UPDATE') {
+                    if (payload.sessionData && payload.sessionData.sessionCode === this.sessionCode) {
+                        this.sessionData = payload.sessionData;
+                        this.saveSessionToLocalArchive();
+                        this.renderSessionBoard();
+                    }
+                }
+            }
+
+            async broadcastToNtfy(payload) {
+                if (!this.sessionCode) return;
+                const topic = this.getNtfyTopic();
+                try {
+                    await fetch(`https://ntfy.sh/${topic}`, {
+                        method: 'POST',
+                        headers: { 'Title': 'Food Order Update' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (e) {
+                    console.warn('NTFY broadcast failed:', e);
+                }
+            }
+
+            // Generate clean 6-character uppercase alphanumeric code
             generateShortCode() {
                 const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
                 let code = '';
@@ -652,7 +679,7 @@
             }
 
             // -------------------------------------------------------------
-            // SESSION CREATION & STORAGE (MANDATORY RULE 1 COMPLIANT)
+            // SESSION CREATION & LOCAL STORAGE
             // -------------------------------------------------------------
             async handleCreateSession(event) {
                 if (event) event.preventDefault();
@@ -689,7 +716,10 @@
                     };
 
                     this.saveSessionToLocalArchive();
-                    await this.syncToFirebase();
+                    await this.broadcastToNtfy({
+                        type: 'SESSION_UPDATE',
+                        sessionData: this.sessionData
+                    });
 
                     this.closeModal('modal-create-session');
                     window.location.hash = `#session=${this.sessionCode}`;
@@ -707,7 +737,7 @@
                 }
             }
 
-            async saveSessionData() {
+            async saveSessionData(broadcastPayload = null) {
                 this.saveSessionToLocalArchive();
 
                 if (this.broadcastChannel) {
@@ -717,7 +747,14 @@
                     });
                 }
 
-                await this.syncToFirebase();
+                if (broadcastPayload) {
+                    await this.broadcastToNtfy(broadcastPayload);
+                } else {
+                    await this.broadcastToNtfy({
+                        type: 'SESSION_UPDATE',
+                        sessionData: this.sessionData
+                    });
+                }
             }
 
             saveSessionToLocalArchive() {
@@ -738,47 +775,6 @@
                 } catch (e) {}
             }
 
-            // Syncs order state instantly to Firebase Firestore under RULE 1 public path
-            async syncToFirebase() {
-                if (window.firebaseStore && window.firebaseStore.db && this.sessionCode) {
-                    try {
-                        const { db, appId, doc, setDoc } = window.firebaseStore;
-                        // RULE 1: /artifacts/{appId}/public/data/{collectionName}/{documentId}
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'food_sessions', this.sessionCode);
-                        await setDoc(docRef, this.sessionData, { merge: true });
-                    } catch (e) {
-                        console.error("Firebase sync error:", e);
-                    }
-                }
-            }
-
-            // Real-time listener: changes made by anyone reflect across all screens immediately
-            listenToSessionCloud(code) {
-                if (this.fbUnsubscribe) {
-                    this.fbUnsubscribe();
-                    this.fbUnsubscribe = null;
-                }
-
-                if (window.firebaseStore && window.firebaseStore.db) {
-                    try {
-                        const { db, appId, doc, onSnapshot } = window.firebaseStore;
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'food_sessions', code);
-                        
-                        this.fbUnsubscribe = onSnapshot(docRef, (snap) => {
-                            if (snap.exists()) {
-                                this.sessionData = snap.data();
-                                this.saveSessionToLocalArchive();
-                                this.renderSessionBoard();
-                            }
-                        }, (err) => {
-                            console.warn("Real-time listener callback error:", err);
-                        });
-                    } catch (e) {
-                        console.error("Error setting onSnapshot listener:", e);
-                    }
-                }
-            }
-
             loadSessionState(code) {
                 const localData = localStorage.getItem(`food_session_${code}`);
                 if (localData) {
@@ -786,8 +782,7 @@
                         this.sessionData = JSON.parse(localData);
                     } catch (e) {}
                 }
-
-                this.listenToSessionCloud(code);
+                this.initEventSource(code);
             }
 
             // -------------------------------------------------------------
@@ -803,9 +798,9 @@
                     this.loadSessionState(this.sessionCode);
                     this.renderSessionBoard();
                 } else {
-                    if (this.fbUnsubscribe) {
-                        this.fbUnsubscribe();
-                        this.fbUnsubscribe = null;
+                    if (this.eventSource) {
+                        this.eventSource.close();
+                        this.eventSource = null;
                     }
                     this.showLandingView();
                 }
@@ -1187,26 +1182,36 @@
                     targetIndex = participants.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
                 }
 
+                let savedParticipant = null;
+
                 if (targetIndex >= 0) {
                     participants[targetIndex].name = name;
                     participants[targetIndex].items = items;
                     participants[targetIndex].paymentMethod = this.selectedPaymentMethod;
                     participants[targetIndex].note = note;
+                    savedParticipant = participants[targetIndex];
                     this.showToast(`Updated ${name}'s order!`, 'success');
                 } else {
-                    participants.push({
+                    savedParticipant = {
                         id: 'part_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 5),
                         name: name,
                         items: items,
                         paymentMethod: this.selectedPaymentMethod,
                         note: note,
                         isPaid: false
-                    });
+                    };
+                    participants.push(savedParticipant);
                     this.showToast(`Added ${name}'s order to the board!`, 'success');
                 }
 
                 this.sessionData.participants = participants;
-                await this.saveSessionData();
+                
+                // Broadcast individual order update to other peers via NTFY
+                await this.saveSessionData({
+                    type: 'NEW_ORDER',
+                    participant: savedParticipant
+                });
+
                 this.resetOrderForm();
             }
 
@@ -1384,14 +1389,6 @@
                     localStorage.setItem('food_sessions_archive', JSON.stringify(history));
                     localStorage.removeItem(`food_session_${code}`);
 
-                    if (window.firebaseStore && window.firebaseStore.db) {
-                        try {
-                            const { db, appId, doc, deleteDoc } = window.firebaseStore;
-                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'food_sessions', code);
-                            await deleteDoc(docRef);
-                        } catch (e) {}
-                    }
-
                     this.showToast('Session deleted', 'info');
                     this.renderHistoryList();
                 });
@@ -1420,7 +1417,7 @@
             }
 
             // -------------------------------------------------------------
-            // MODAL DIALOGS & UTILITIES (No window.confirm or alert used)
+            // MODAL DIALOGS & UTILITIES
             // -------------------------------------------------------------
             showConfirmDialog(title, message, onConfirm) {
                 const modal = document.getElementById('modal-custom-confirm');
@@ -1455,10 +1452,7 @@
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    this.showToast('Copied to clipboard!', 'success');
-                } catch (err) {
-                    this.showToast('Could not copy automatically', 'error');
-                }
+                } catch (err) {}
                 document.body.removeChild(textArea);
             }
 
