@@ -193,7 +193,7 @@
                             </button>
                         </div>
 
-                        <h2 id="session-restaurant-name" class="text-2xl font-extrabold text-forest-800 tracking-tight pt-1">Restaurant Name</h2>
+                        <h2 id="session-restaurant-name" class="text-2xl sm:text-3xl font-extrabold text-forest-800 tracking-tight pt-1">Restaurant Name</h2>
                         <p id="session-organizer-info" class="text-xs text-slate-500">Organized by Organizer</p>
                     </div>
 
@@ -205,61 +205,77 @@
                         </button>
                         <a id="session-menu-link-btn" href="#" target="_blank" class="hidden inline-flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-yumara-800 bg-yumara-50 hover:bg-yumara-100 rounded-xl border border-yumara-200">
                             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                            <span>Online Menu Link</span>
+                            <span>Web Menu Link</span>
                         </a>
-                        <button onclick="app.openAdminPhotosModal()" class="inline-flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-forest-800 bg-cream-200 hover:bg-cream-300 rounded-xl border border-cream-300 shadow-sm transition-all">
-                            <i data-lucide="image-plus" class="w-3.5 h-3.5 text-yumara-700"></i>
-                            <span id="session-menu-img-btn-label">Manage Photos</span>
-                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- PROMINENT LIVE MENU PHOTOS CARD (Visible to Everyone) -->
-            <div id="prominent-menu-section" class="bg-white rounded-2xl p-4 sm:p-5 border border-cream-300 shadow-sm space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cream-200 pb-3">
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-yumara-100 text-yumara-700 flex items-center justify-center border border-yumara-200">
-                            <i data-lucide="images" class="w-4 h-4"></i>
+            <!-- PROMINENT TOP-OF-PAGE MENU HERO SHOWCASE (First visible element for all colleagues) -->
+            <section id="prominent-menu-section" class="bg-white rounded-3xl p-4 sm:p-6 border-2 border-yumara-200 shadow-md space-y-4">
+                <!-- Top bar of the Hero Menu Card -->
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-cream-200 pb-3.5">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-yumara-600 text-white flex items-center justify-center shadow-md shadow-yumara-600/30">
+                            <i data-lucide="book-open" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-extrabold text-forest-800 text-sm sm:text-base">Restaurant Menu Photos</h3>
-                                <span id="prominent-photo-counter" class="text-xs font-extrabold bg-yumara-100 text-yumara-800 border border-yumara-200 px-2 py-0.5 rounded-full">0 Photos</span>
+                            <div class="flex items-center gap-2.5">
+                                <h3 class="font-extrabold text-forest-800 text-base sm:text-lg tracking-tight">Restaurant Menu Pictures</h3>
+                                <span id="prominent-photo-counter" class="text-xs font-extrabold bg-yumara-100 text-yumara-900 border border-yumara-300 px-2.5 py-0.5 rounded-full">0 Pages</span>
                             </div>
-                            <p class="text-[11px] text-slate-500">Tap or click the image to open the crystal-clear zoom inspection lightbox.</p>
+                            <p class="text-xs text-slate-500 font-medium mt-0.5">Browse the pages below. Tap or click any picture to zoom in razor-sharp detail.</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="app.openAdminPhotosModal()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-yumara-800 bg-yumara-50 hover:bg-yumara-100 rounded-lg border border-yumara-200 transition-colors">
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                            <span>Add Photos</span>
+
+                    <!-- Direct Quick-Add Buttons inside Top Header -->
+                    <div class="flex items-center gap-2">
+                        <label class="cursor-pointer inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold text-white bg-forest-800 hover:bg-forest-900 rounded-xl shadow-sm transition-all">
+                            <i data-lucide="upload" class="w-3.5 h-3.5 text-yumara-300"></i>
+                            <span>Upload Page</span>
+                            <input type="file" multiple accept="image/*" class="hidden" onchange="app.handleFilesSelected(event, 'admin')">
+                        </label>
+                        <button onclick="app.openAdminPhotosModal()" class="inline-flex items-center space-x-1 px-3 py-2 text-xs font-bold text-forest-800 bg-cream-200 hover:bg-cream-300 rounded-xl border border-cream-300 transition-colors">
+                            <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
+                            <span class="hidden sm:inline">Manage Pages</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Active Photo Display Area with Quick Preview -->
-                <div id="prominent-menu-viewer-container" class="relative group bg-forest-900 rounded-xl overflow-hidden border border-cream-300 flex items-center justify-center min-h-[220px] max-h-[460px]">
-                    <img id="prominent-main-photo" src="" alt="Menu Page" class="w-full h-auto max-h-[450px] object-contain cursor-zoom-in crisp-img transition-opacity duration-200" onclick="app.openMenuImageModal(app.activeInlinePhotoIndex)">
+                <!-- Showcase Big Picture Viewer Container -->
+                <div id="prominent-menu-viewer-container" class="relative group bg-forest-900/95 rounded-2xl overflow-hidden border border-cream-300 flex items-center justify-center min-h-[300px] sm:min-h-[420px] max-h-[620px] shadow-inner">
+                    <img id="prominent-main-photo" src="" alt="Menu Page" class="w-full h-auto max-h-[600px] object-contain cursor-zoom-in crisp-img transition-opacity duration-200" onclick="app.openMenuImageModal(app.activeInlinePhotoIndex)">
                     
-                    <!-- Hover/Touch Enlarge Badge -->
-                    <div class="absolute bottom-3 right-3 bg-forest-900/80 hover:bg-forest-900 text-white backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 border border-white/20 shadow-lg pointer-events-none group-hover:scale-105 transition-transform">
-                        <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-yumara-300"></i>
-                        <span>Click to Enlarge &amp; Zoom</span>
+                    <!-- Top Page Label Badge -->
+                    <div id="inline-page-badge" class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-xl text-xs font-bold border border-white/20 shadow flex items-center gap-1.5">
+                        <i data-lucide="image" class="w-3.5 h-3.5 text-yumara-300"></i>
+                        <span id="inline-page-badge-text">Page 1 of 1</span>
                     </div>
 
-                    <!-- Inline Prev/Next Arrows -->
-                    <button id="inline-btn-prev" onclick="app.prevInlinePhoto(event)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/90 text-white rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-md transition-all">
-                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    <!-- Enlarge / Fullscreen Floating Prompt -->
+                    <button type="button" onclick="app.openMenuImageModal(app.activeInlinePhotoIndex)" class="absolute bottom-3 right-3 bg-forest-900/80 hover:bg-forest-900 text-white backdrop-blur-md px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 border border-white/25 shadow-lg group-hover:scale-105 transition-all">
+                        <i data-lucide="maximize-2" class="w-4 h-4 text-yumara-300"></i>
+                        <span>Click to Inspect &amp; Zoom</span>
                     </button>
-                    <button id="inline-btn-next" onclick="app.nextInlinePhoto(event)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/90 text-white rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-md transition-all">
-                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+
+                    <!-- Prev/Next Inline Floating Buttons -->
+                    <button id="inline-btn-prev" onclick="app.prevInlinePhoto(event)" class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/90 text-white rounded-full flex items-center justify-center backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-110 active:scale-95" title="Previous page">
+                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    </button>
+                    <button id="inline-btn-next" onclick="app.nextInlinePhoto(event)" class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/90 text-white rounded-full flex items-center justify-center backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-110 active:scale-95" title="Next page">
+                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
                     </button>
                 </div>
 
-                <!-- Thumbnail Strip & Indicator -->
-                <div id="prominent-thumbnails-strip" class="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar"></div>
-            </div>
+                <!-- Thumbnail Reel Strip with Page Number Badges -->
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
+                        <span>Select Page:</span>
+                        <span id="thumbnail-helper-text" class="text-yumara-700 font-semibold normal-case">Tap to jump between menu pages</span>
+                    </div>
+                    <div id="prominent-thumbnails-strip" class="flex items-center gap-2.5 overflow-x-auto py-1.5 px-0.5 custom-scrollbar"></div>
+                </div>
+            </section>
 
             <!-- Grid: Left = Add/Edit Form & Order Board, Right = Bill & Admin Controls -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1325,22 +1341,31 @@
                 const section = document.getElementById('prominent-menu-section');
                 const mainPhoto = document.getElementById('prominent-main-photo');
                 const counter = document.getElementById('prominent-photo-counter');
+                const pageBadge = document.getElementById('inline-page-badge');
+                const pageBadgeText = document.getElementById('inline-page-badge-text');
                 const thumbnails = document.getElementById('prominent-thumbnails-strip');
                 const prevBtn = document.getElementById('inline-btn-prev');
                 const nextBtn = document.getElementById('inline-btn-next');
                 const photos = this.sessionData.menuImages || [];
 
-                counter.innerText = `${photos.length} Photo${photos.length === 1 ? '' : 's'}`;
+                counter.innerText = `${photos.length} Page${photos.length === 1 ? '' : 's'}`;
 
                 if (photos.length === 0) {
-                    // Empty state encouraging upload
-                    mainPhoto.src = 'https://placehold.co/1200x400/2d3524/e8e2d4?text=No+Menu+Photos+Yet.+Click+Add+Photos+Above';
+                    mainPhoto.src = 'https://placehold.co/1200x500/2d3524/e8e2d4?text=No+Menu+Pictures+Uploaded+Yet.+Tap+Upload+Above';
                     mainPhoto.onclick = () => this.openAdminPhotosModal();
+                    if (pageBadge) pageBadge.classList.add('hidden');
                     prevBtn.classList.add('hidden');
                     nextBtn.classList.add('hidden');
-                    thumbnails.innerHTML = '';
+                    thumbnails.innerHTML = `
+                        <div class="text-xs text-slate-400 py-2 px-1 flex items-center gap-2">
+                            <i data-lucide="info" class="w-4 h-4 text-yumara-600"></i>
+                            <span>No pictures yet. The organizer can tap <strong>"Upload Page"</strong> to attach high-res menu pages.</span>
+                        </div>
+                    `;
                     return;
                 }
+
+                if (pageBadge) pageBadge.classList.remove('hidden');
 
                 if (this.activeInlinePhotoIndex >= photos.length) {
                     this.activeInlinePhotoIndex = 0;
@@ -1350,6 +1375,10 @@
                 mainPhoto.src = currentSrc;
                 mainPhoto.onclick = () => this.openMenuImageModal(this.activeInlinePhotoIndex);
 
+                if (pageBadgeText) {
+                    pageBadgeText.innerText = `Page ${this.activeInlinePhotoIndex + 1} of ${photos.length}`;
+                }
+
                 if (photos.length > 1) {
                     prevBtn.classList.remove('hidden');
                     nextBtn.classList.remove('hidden');
@@ -1358,10 +1387,13 @@
                     nextBtn.classList.add('hidden');
                 }
 
-                // Render thumbnail items
+                // Render thumbnail items with high clarity and active ring indicator
                 thumbnails.innerHTML = photos.map((src, idx) => `
-                    <button type="button" onclick="app.setInlinePhoto(${idx})" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-transform ${idx === this.activeInlinePhotoIndex ? 'border-yumara-600 scale-105 shadow-md ring-2 ring-yumara-500/20' : 'border-cream-300 opacity-60 hover:opacity-100'}">
+                    <button type="button" onclick="app.setInlinePhoto(${idx})" class="group relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${idx === this.activeInlinePhotoIndex ? 'border-yumara-600 scale-105 shadow-md ring-2 ring-yumara-500/30' : 'border-cream-300 opacity-60 hover:opacity-100 hover:scale-100'}">
                         <img src="${src}" class="w-full h-full object-cover crisp-img">
+                        <span class="absolute bottom-1 right-1 text-[9px] font-black px-1.5 py-0.5 rounded-md bg-forest-900/80 text-white backdrop-blur-sm">
+                            #${idx + 1}
+                        </span>
                     </button>
                 `).join('');
             }
